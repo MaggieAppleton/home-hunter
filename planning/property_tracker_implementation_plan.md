@@ -85,8 +85,8 @@ Train stations & map enhancements
 
 - [ ] [P2-12] Load static dataset of South London train/Tube/Overground stations
 - [ ] [P2-13] Render station markers; toggle visibility
-- [ ] [P2-14] Compute distance/walking time to nearest station
-- [ ] [P2-16] Marker color by status (not contacted, contacted, viewing scheduled, viewed, rejected, sold)
+- [ ] [P2-14] Compute distance/walking time to nearest stations; add all stations within 1km of the property to the database as both distance and walking time
+- [ ] [P2-16] Marker color by status (not contacted, contacted, viewing booked, viewed, rejected, sold)
 
 Data management
 

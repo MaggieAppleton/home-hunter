@@ -24,6 +24,7 @@ const statusColors = {
   Contacted: '#F97316', // orange
   'Viewing booked': '#3B82F6', // blue
   Viewed: '#10B981', // green
+  Rejected: '#8B5CF6', // purple
   Sold: '#EF4444', // red
 };
 

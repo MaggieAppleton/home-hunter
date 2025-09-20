@@ -42,12 +42,21 @@ function App() {
               <h2 className="text-lg font-medium text-gray-900 mb-4">
                 Property Summary
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-blue-600">
                     {properties.length}
                   </div>
                   <div className="text-sm text-gray-600">Total Properties</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-600">
+                    {
+                      properties.filter((p) => p.status === 'Not contacted')
+                        .length
+                    }
+                  </div>
+                  <div className="text-sm text-gray-600">Not Contacted</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-orange-600">
@@ -56,10 +65,25 @@ function App() {
                   <div className="text-sm text-gray-600">Contacted</div>
                 </div>
                 <div className="text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {
+                      properties.filter((p) => p.status === 'Viewing booked')
+                        .length
+                    }
+                  </div>
+                  <div className="text-sm text-gray-600">Viewing Booked</div>
+                </div>
+                <div className="text-center">
                   <div className="text-2xl font-bold text-green-600">
                     {properties.filter((p) => p.status === 'Viewed').length}
                   </div>
                   <div className="text-sm text-gray-600">Viewed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-purple-600">
+                    {properties.filter((p) => p.status === 'Rejected').length}
+                  </div>
+                  <div className="text-sm text-gray-600">Rejected</div>
                 </div>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-red-600">

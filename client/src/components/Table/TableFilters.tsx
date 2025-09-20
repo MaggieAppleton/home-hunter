@@ -13,6 +13,7 @@ const statusOptions = [
   { value: 'Contacted', label: 'Contacted' },
   { value: 'Viewing booked', label: 'Viewing booked' },
   { value: 'Viewed', label: 'Viewed' },
+  { value: 'Rejected', label: 'Rejected' },
   { value: 'Sold', label: 'Sold' },
 ];
 

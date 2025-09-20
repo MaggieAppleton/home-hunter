@@ -46,16 +46,19 @@ export function PropertyMap({
   const propertiesWithLocation = properties.filter((p) => p.gpsLat && p.gpsLng);
 
   return (
-    <div className="h-96 w-full rounded-lg border border-gray-200">
+    <div
+      className="w-full rounded-lg border border-gray-200"
+      style={{ height: '800px' }}
+    >
       <MapContainer
         center={center}
         zoom={zoom}
         style={{ height: '100%', width: '100%' }}
-        className="rounded-lg"
+        className="rounded-lg map-clean"
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
         />
 
         {/* Fit bounds to show all properties */}

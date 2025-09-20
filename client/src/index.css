@@ -1,3 +1,18 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom map styling for clean visual appearance */
+.map-clean {
+  filter: contrast(1.1) saturate(0.8);
+}
+
+/* Ensure map tiles load smoothly */
+.leaflet-tile {
+  filter: none;
+}
+
+/* Custom styling for the map container */
+.leaflet-container {
+  font-family: inherit;
+}

@@ -19,6 +19,7 @@ const statusOptions = [
   'Contacted',
   'Viewing booked',
   'Viewed',
+  'Rejected',
   'Sold',
 ] as const;
 
@@ -40,6 +41,7 @@ export function PropertyForm({
       | 'Contacted'
       | 'Viewing booked'
       | 'Viewed'
+      | 'Rejected'
       | 'Sold',
     trainStation: '',
     features: '',

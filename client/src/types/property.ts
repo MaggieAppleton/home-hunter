@@ -5,7 +5,13 @@ export interface Property {
   squareFeet?: number;
   bedrooms?: number;
   bathrooms?: number;
-  status: 'Not contacted' | 'Contacted' | 'Viewing booked' | 'Viewed' | 'Sold';
+  status:
+    | 'Not contacted'
+    | 'Contacted'
+    | 'Viewing booked'
+    | 'Viewed'
+    | 'Rejected'
+    | 'Sold';
   trainStation?: string;
   features: string[];
   link?: string;
@@ -34,7 +40,13 @@ export interface CreatePropertyRequest {
   squareFeet?: number;
   bedrooms?: number;
   bathrooms?: number;
-  status?: 'Not contacted' | 'Contacted' | 'Viewing booked' | 'Viewed' | 'Sold';
+  status?:
+    | 'Not contacted'
+    | 'Contacted'
+    | 'Viewing booked'
+    | 'Viewed'
+    | 'Rejected'
+    | 'Sold';
   trainStation?: string;
   features?: string[];
   link?: string;
