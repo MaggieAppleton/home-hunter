@@ -43,6 +43,7 @@ export interface CreatePropertyRequest {
   gpsLng?: number;
   mapReference?: string;
   notes?: string;
+  dateViewed?: Date;
 }
 
 export interface UpdatePropertyRequest extends Partial<CreatePropertyRequest> {

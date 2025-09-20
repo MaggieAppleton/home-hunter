@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 20, 2025 11:48P
+Updated: September 20, 2025 11:53P
 
 Purpose
 
@@ -39,28 +39,28 @@ Phase 1 — Core functionality
 
 Database and backend
 
-- [ ] [P1-01] Implement SQLite connection (`server/src/database/connection.ts`)
-- [ ] [P1-02] Add migrations framework and script (`server/src/database/migrations/`)
-- [ ] [P1-03] Create `properties` table migration (per spec)
-- [ ] [P1-04] Create `property_images` table migration (per spec)
-- [ ] [P1-05] Seed script to insert one example property
-- [ ] [P1-06] CRUD routes: `GET /api/properties` (list)
-- [ ] [P1-07] CRUD routes: `GET /api/properties/:id` (single)
-- [ ] [P1-08] CRUD routes: `POST /api/properties` (create)
-- [ ] [P1-09] CRUD routes: `PUT /api/properties/:id` (update)
-- [ ] [P1-10] CRUD routes: `DELETE /api/properties/:id` (delete)
+- [x] [P1-01] Implement SQLite connection (`server/src/database/connection.ts`)
+- [x] [P1-02] Add migrations framework and script (`server/src/database/migrations/`)
+- [x] [P1-03] Create `properties` table migration (per spec)
+- [x] [P1-04] Create `property_images` table migration (per spec)
+- [x] [P1-05] Seed script to insert one example property
+- [x] [P1-06] CRUD routes: `GET /api/properties` (list)
+- [x] [P1-07] CRUD routes: `GET /api/properties/:id` (single)
+- [x] [P1-08] CRUD routes: `POST /api/properties` (create)
+- [x] [P1-09] CRUD routes: `PUT /api/properties/:id` (update)
+- [x] [P1-10] CRUD routes: `DELETE /api/properties/:id` (delete)
 
 Frontend basics
 
-- [ ] [P1-11] API utility (`client/src/utils/api.ts`) with base client
-- [ ] [P1-12] Types (`client/src/types/property.ts`) aligned to spec
-- [ ] [P1-13] `useProperties` hook (list + refetch)
-- [ ] [P1-14] Minimal `PropertyTable.tsx` (name, price, status)
-- [ ] [P1-15] Install Leaflet; baseline `PropertyMap.tsx` with OSM tiles
-- [ ] [P1-16] Basic property markers from API positions (no clustering yet)
-- [ ] [P1-17] `MarkerPopup.tsx` skeleton (key info; no images yet)
-- [ ] [P1-18] `PropertyForm.tsx` (create/edit core fields, no images)
-- [ ] [P1-19] Simple navigation/layout (`Header`, `Navigation`)
+- [x] [P1-11] API utility (`client/src/utils/api.ts`) with base client
+- [x] [P1-12] Types (`client/src/types/property.ts`) aligned to spec
+- [x] [P1-13] `useProperties` hook (list + refetch)
+- [x] [P1-14] Minimal `PropertyTable.tsx` (name, price, status)
+- [x] [P1-15] Install Leaflet; baseline `PropertyMap.tsx` with OSM tiles
+- [x] [P1-16] Basic property markers from API positions (no clustering yet)
+- [x] [P1-17] `MarkerPopup.tsx` skeleton (key info; no images yet)
+- [x] [P1-18] `PropertyForm.tsx` (create/edit core fields, no images)
+- [x] [P1-19] Simple navigation/layout (`Header`, `Navigation`)
 
 Phase 2 — Enhanced features
 

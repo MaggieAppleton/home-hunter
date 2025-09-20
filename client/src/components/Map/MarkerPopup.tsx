@@ -1,0 +1,105 @@
+import type { Property } from '../../types/property';
+
+interface MarkerPopupProps {
+  property: Property;
+}
+
+function formatPrice(price?: number): string {
+  if (!price) return 'Price not available';
+  return new Intl.NumberFormat('en-GB', {
+    style: 'currency',
+    currency: 'GBP',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(price / 100); // Convert from pence to pounds
+}
+
+const statusColors = {
+  'Not contacted': 'bg-gray-100 text-gray-800',
+  Contacted: 'bg-orange-100 text-orange-800',
+  'Viewing booked': 'bg-blue-100 text-blue-800',
+  Viewed: 'bg-green-100 text-green-800',
+  Sold: 'bg-red-100 text-red-800',
+};
+
+export function MarkerPopup({ property }: MarkerPopupProps) {
+  return (
+    <div className="p-2 min-w-[200px]">
+      <div className="space-y-2">
+        {/* Property Name */}
+        <h3 className="font-semibold text-gray-900 text-sm leading-tight">
+          {property.name}
+        </h3>
+
+        {/* Price */}
+        <div className="text-lg font-bold text-blue-600">
+          {formatPrice(property.price)}
+        </div>
+
+        {/* Property Details */}
+        <div className="space-y-1 text-sm text-gray-600">
+          {property.bedrooms && (
+            <div className="flex items-center">
+              <span className="font-medium">Bedrooms:</span>
+              <span className="ml-2">{property.bedrooms}</span>
+            </div>
+          )}
+
+          {property.bathrooms && (
+            <div className="flex items-center">
+              <span className="font-medium">Bathrooms:</span>
+              <span className="ml-2">{property.bathrooms}</span>
+            </div>
+          )}
+
+          {property.squareFeet && (
+            <div className="flex items-center">
+              <span className="font-medium">Size:</span>
+              <span className="ml-2">{property.squareFeet} sq ft</span>
+            </div>
+          )}
+        </div>
+
+        {/* Status */}
+        <div className="flex items-center">
+          <span className="font-medium text-sm">Status:</span>
+          <span
+            className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[property.status]}`}
+          >
+            {property.status}
+          </span>
+        </div>
+
+        {/* Train Station */}
+        {property.trainStation && (
+          <div className="text-sm text-gray-600">
+            <span className="font-medium">Nearest Station:</span>
+            <span className="ml-2">{property.trainStation}</span>
+          </div>
+        )}
+
+        {/* Agency */}
+        {property.agency && (
+          <div className="text-sm text-gray-600">
+            <span className="font-medium">Agency:</span>
+            <span className="ml-2">{property.agency}</span>
+          </div>
+        )}
+
+        {/* Link */}
+        {property.link && (
+          <div className="pt-2">
+            <a
+              href={property.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              View Property
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
