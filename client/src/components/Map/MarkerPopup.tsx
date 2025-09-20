@@ -1,4 +1,5 @@
 import type { Property } from '../../types/property';
+import { api } from '../../utils/api';
 
 interface MarkerPopupProps {
   property: Property;
@@ -26,6 +27,17 @@ export function MarkerPopup({ property }: MarkerPopupProps) {
   return (
     <div className="p-2 min-w-[200px]">
       <div className="space-y-2">
+        {/* Cover Image */}
+        {property.coverImage && (
+          <div className="w-full h-32 rounded-lg overflow-hidden bg-gray-100">
+            <img
+              src={api.images.getImageUrl(property.coverImage)}
+              alt={property.name}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        )}
+
         {/* Property Name */}
         <h3 className="font-semibold text-gray-900 text-sm leading-tight">
           {property.name}

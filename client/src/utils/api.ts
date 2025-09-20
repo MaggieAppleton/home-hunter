@@ -2,6 +2,7 @@ import type {
   Property,
   CreatePropertyRequest,
   UpdatePropertyRequest,
+  PropertyImage,
 } from '../types/property';
 
 const API_BASE_URL = 'http://localhost:3001/api';
@@ -91,6 +92,50 @@ export const api = {
         method: 'DELETE',
       });
       return handleResponse<void>(response);
+    },
+  },
+
+  // Images endpoints
+  images: {
+    // Upload images for a property
+    async upload(
+      propertyId: number,
+      files: File[]
+    ): Promise<{ images: PropertyImage[] }> {
+      const formData = new FormData();
+      files.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const response = await fetch(
+        `${API_BASE_URL}/properties/${propertyId}/images`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+      return handleResponse<{ images: PropertyImage[] }>(response);
+    },
+
+    // Delete an image
+    async delete(imageId: number): Promise<void> {
+      const response = await fetch(`${API_BASE_URL}/images/${imageId}`, {
+        method: 'DELETE',
+      });
+      return handleResponse<void>(response);
+    },
+
+    // Set image as cover
+    async setCover(imageId: number): Promise<{ message: string }> {
+      const response = await fetch(`${API_BASE_URL}/images/${imageId}/cover`, {
+        method: 'PUT',
+      });
+      return handleResponse<{ message: string }>(response);
+    },
+
+    // Get image URL
+    getImageUrl(filename: string): string {
+      return `${API_BASE_URL}/images/${filename}`;
     },
   },
 

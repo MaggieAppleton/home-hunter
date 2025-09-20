@@ -1,11 +1,17 @@
 import { useState, useEffect } from 'react';
-import type { Property, CreatePropertyRequest } from '../../types/property';
+import type {
+  Property,
+  CreatePropertyRequest,
+  PropertyImage,
+} from '../../types/property';
+import { ImageUpload } from './ImageUpload';
 
 interface PropertyFormProps {
   property?: Property;
   onSubmit: (data: CreatePropertyRequest) => Promise<void>;
   onCancel: () => void;
   loading?: boolean;
+  onError?: (error: string) => void;
 }
 
 const statusOptions = [
@@ -21,6 +27,7 @@ export function PropertyForm({
   onSubmit,
   onCancel,
   loading = false,
+  onError,
 }: PropertyFormProps) {
   const [formData, setFormData] = useState({
     name: '',
@@ -45,6 +52,8 @@ export function PropertyForm({
     dateViewed: '',
   });
 
+  const [images, setImages] = useState<PropertyImage[]>([]);
+
   // Populate form with existing property data
   useEffect(() => {
     if (property) {
@@ -67,6 +76,7 @@ export function PropertyForm({
           ? property.dateViewed.toISOString().split('T')[0]
           : '',
       });
+      setImages(property.images || []);
     }
   }, [property]);
 
@@ -446,6 +456,30 @@ export function PropertyForm({
           </div>
         </div>
       </div>
+
+      {/* Images Section - Only show for existing properties */}
+      {property && (
+        <div className="bg-white shadow px-4 py-5 sm:rounded-lg sm:p-6">
+          <div className="md:grid md:grid-cols-3 md:gap-6">
+            <div className="md:col-span-1">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                Property Images
+              </h3>
+              <p className="mt-1 text-sm text-gray-500">
+                Upload and manage images for this property.
+              </p>
+            </div>
+            <div className="mt-5 md:mt-0 md:col-span-2">
+              <ImageUpload
+                propertyId={property.id!}
+                existingImages={images}
+                onImagesChange={setImages}
+                onError={onError || (() => {})}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Form Actions */}
       <div className="flex justify-end space-x-3">
