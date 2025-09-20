@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 20, 2025 11:53P
+Updated: September 20, 2025 12:16P
 
 Purpose
 
@@ -66,12 +66,12 @@ Phase 2 — Enhanced features
 
 Images
 
-- [ ] [P2-01] Endpoint: `POST /api/properties/:id/images` (upload via multipart)
-- [ ] [P2-02] Endpoint: `GET /api/images/:filename` (serve image)
-- [ ] [P2-03] Endpoint: `DELETE /api/images/:id` (delete)
-- [ ] [P2-04] Endpoint: `PUT /api/images/:id/cover` (set cover)
-- [ ] [P2-05] Client `ImageUpload.tsx` (multi-upload, mark cover)
-- [ ] [P2-06] Show cover image in marker popup
+- [x] [P2-01] Endpoint: `POST /api/properties/:id/images` (upload via multipart)
+- [x] [P2-02] Endpoint: `GET /api/images/:filename` (serve image)
+- [x] [P2-03] Endpoint: `DELETE /api/images/:id` (delete)
+- [x] [P2-04] Endpoint: `PUT /api/images/:id/cover` (set cover)
+- [x] [P2-05] Client `ImageUpload.tsx` (multi-upload, mark cover)
+- [x] [P2-06] Show cover image in marker popup
 
 Filtering, sorting, search, export
 
