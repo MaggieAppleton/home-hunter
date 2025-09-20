@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 20, 2025 12:16P
+Updated: September 20, 2025 3:10P
 
 Purpose
 
@@ -75,20 +75,18 @@ Images
 
 Filtering, sorting, search, export
 
-- [ ] [P2-07] `TableFilters.tsx` with status, price, bedrooms filters
-- [ ] [P2-08] Column sorting on all displayed fields
-- [ ] [P2-09] Text search across name/address/notes
-- [ ] [P2-10] CSV export of filtered view
-- [ ] [P2-11] Price/number formatting utils (`utils/formatting.ts`)
+- [x] [P2-07] `TableFilters.tsx` with status filters
+- [x] [P2-08] Column sorting on all displayed fields
+- [x] [P2-09] Text search across name/address/notes
+- [x] [P2-10] CSV export of filtered view
+- [x] [P2-11] Price/number formatting utils (`utils/formatting.ts`)
 
 Train stations & map enhancements
 
 - [ ] [P2-12] Load static dataset of South London train/Tube/Overground stations
 - [ ] [P2-13] Render station markers; toggle visibility
 - [ ] [P2-14] Compute distance/walking time to nearest station
-- [ ] [P2-15] Filter by max travel time to central London
-- [ ] [P2-16] Marker color by status (gray/orange/blue/green/red)
-- [ ] [P2-17] Marker clustering for properties when zoomed out
+- [ ] [P2-16] Marker color by status (not contacted, contacted, viewing scheduled, viewed, rejected, sold)
 
 Data management
 

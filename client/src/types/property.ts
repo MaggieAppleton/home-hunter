@@ -52,8 +52,5 @@ export interface UpdatePropertyRequest extends Partial<CreatePropertyRequest> {
 
 export interface PropertyFilters {
   status?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  bedrooms?: number;
   search?: string;
 }

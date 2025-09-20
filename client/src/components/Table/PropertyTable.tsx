@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import type { Property } from '../../types/property';
+import { formatPrice, formatDate } from '../../utils/formatting';
 
 interface PropertyTableProps {
   properties: Property[];
   loading: boolean;
   error: string | null;
 }
+
+type SortField = 'name' | 'price' | 'bedrooms' | 'status' | 'dateAdded';
+type SortDirection = 'asc' | 'desc';
 
 const statusColors = {
   'Not contacted': 'bg-gray-100 text-gray-800',
@@ -14,22 +19,44 @@ const statusColors = {
   Sold: 'bg-red-100 text-red-800',
 };
 
-function formatPrice(price?: number): string {
-  if (!price) return 'N/A';
-  return new Intl.NumberFormat('en-GB', {
-    style: 'currency',
-    currency: 'GBP',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(price / 100); // Convert from pence to pounds
-}
+function sortProperties(
+  properties: Property[],
+  field: SortField,
+  direction: SortDirection
+): Property[] {
+  return [...properties].sort((a, b) => {
+    let aValue: any;
+    let bValue: any;
 
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-GB', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric',
-  }).format(date);
+    switch (field) {
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'price':
+        aValue = a.price || 0;
+        bValue = b.price || 0;
+        break;
+      case 'bedrooms':
+        aValue = a.bedrooms || 0;
+        bValue = b.bedrooms || 0;
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'dateAdded':
+        aValue = new Date(a.dateAdded).getTime();
+        bValue = new Date(b.dateAdded).getTime();
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) return direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+    return 0;
+  });
 }
 
 export function PropertyTable({
@@ -37,6 +64,19 @@ export function PropertyTable({
   loading,
   error,
 }: PropertyTableProps) {
+  const [sortField, setSortField] = useState<SortField>('dateAdded');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const sortedProperties = sortProperties(properties, sortField, sortDirection);
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -73,30 +113,61 @@ export function PropertyTable({
     );
   }
 
+  const SortableHeader = ({
+    field,
+    children,
+  }: {
+    field: SortField;
+    children: React.ReactNode;
+  }) => (
+    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+      <button
+        onClick={() => handleSort(field)}
+        className="flex items-center space-x-1 hover:text-gray-700 focus:outline-none focus:text-gray-700"
+      >
+        <span>{children}</span>
+        <span className="flex flex-col">
+          <svg
+            className={`w-3 h-3 ${
+              sortField === field && sortDirection === 'asc'
+                ? 'text-gray-900'
+                : 'text-gray-400'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+          </svg>
+          <svg
+            className={`w-3 h-3 -mt-1 ${
+              sortField === field && sortDirection === 'desc'
+                ? 'text-gray-900'
+                : 'text-gray-400'
+            }`}
+            fill="currentColor"
+            viewBox="0 0 20 20"
+          >
+            <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+          </svg>
+        </span>
+      </button>
+    </th>
+  );
+
   return (
     <div className="overflow-x-auto">
       <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Property
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Price
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Bedrooms
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date Added
-            </th>
+            <SortableHeader field="name">Property</SortableHeader>
+            <SortableHeader field="price">Price</SortableHeader>
+            <SortableHeader field="bedrooms">Bedrooms</SortableHeader>
+            <SortableHeader field="status">Status</SortableHeader>
+            <SortableHeader field="dateAdded">Date Added</SortableHeader>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {properties.map((property) => (
+          {sortedProperties.map((property) => (
             <tr key={property.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
