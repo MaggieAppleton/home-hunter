@@ -1,7 +1,11 @@
 import { getDatabase } from './connection';
+import { seedTrainStations } from './seed-stations';
 
 export function seedDatabase() {
   const db = getDatabase();
+
+  // Seed train stations (always refresh)
+  seedTrainStations();
 
   // Check if we already have properties
   const countStmt = db.prepare('SELECT COUNT(*) as count FROM properties');

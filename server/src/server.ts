@@ -4,6 +4,7 @@ import { runMigrations } from './database/migrations/index';
 import { seedDatabase } from './database/seed';
 import propertiesRouter from './routes/properties';
 import imagesRouter from './routes/images';
+import trainStationsRouter from './routes/train-stations';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -14,6 +15,7 @@ app.use(express.json());
 
 // Routes
 app.use('/api/properties', propertiesRouter);
+app.use('/api/train-stations', trainStationsRouter);
 app.use('/api', imagesRouter);
 
 // Health check route

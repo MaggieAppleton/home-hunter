@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 20, 2025 3:10P
+Updated: September 20, 2025 5:57P
 
 Purpose
 
@@ -83,21 +83,17 @@ Filtering, sorting, search, export
 
 Train stations & map enhancements
 
-- [ ] [P2-12] Load static dataset of South London train/Tube/Overground stations
-- [ ] [P2-13] Render station markers; toggle visibility
-- [ ] [P2-14] Compute distance/walking time to nearest stations; add all stations within 1km of the property to the database as both distance and walking time
-- [ ] [P2-16] Marker color by status (not contacted, contacted, viewing booked, viewed, rejected, sold)
+- [x] [P2-12] Load static dataset of South London train/Tube/Overground stations
+- [x] [P2-13] Render station markers; toggle visibility
+- [x] [P2-14] Compute distance/walking time to nearest stations; add all stations within 1km of the property to the database as both distance and walking time
+- [x] [P2-15] Add train track lines to map showing major routes (removed - data was incorrect)
+- [x] [P2-16] Marker color by status (not contacted, contacted, viewing booked, viewed, rejected, sold)
+- [x] [P2-17] Implement multi-type station visualization with multiple colored dots for stations serving multiple transport types
 
 Data management
 
 - [ ] [P2-18] `GET /api/export` JSON export of all data
 - [ ] [P2-19] `POST /api/import` JSON import of full dataset
-
-Migration from Airtable
-
-- [ ] [P2-20] Import script: map CSV export -> SQLite schema
-- [ ] [P2-21] Optionally geocode missing GPS coordinates (configurable provider)
-- [ ] [P2-22] Preserve/import image references where available
 
 Phase 3 — Polish and robustness
 

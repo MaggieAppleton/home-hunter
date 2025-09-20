@@ -8,7 +8,13 @@ interface PropertyTableProps {
   error: string | null;
 }
 
-type SortField = 'name' | 'price' | 'bedrooms' | 'status' | 'dateAdded';
+type SortField =
+  | 'name'
+  | 'price'
+  | 'bedrooms'
+  | 'status'
+  | 'dateAdded'
+  | 'nearestStationDistance';
 type SortDirection = 'asc' | 'desc';
 
 const statusColors = {
@@ -49,6 +55,10 @@ function sortProperties(
       case 'dateAdded':
         aValue = new Date(a.dateAdded).getTime();
         bValue = new Date(b.dateAdded).getTime();
+        break;
+      case 'nearestStationDistance':
+        aValue = a.nearestStationDistance || Infinity;
+        bValue = b.nearestStationDistance || Infinity;
         break;
       default:
         return 0;
@@ -164,6 +174,9 @@ export function PropertyTable({
             <SortableHeader field="price">Price</SortableHeader>
             <SortableHeader field="bedrooms">Bedrooms</SortableHeader>
             <SortableHeader field="status">Status</SortableHeader>
+            <SortableHeader field="nearestStationDistance">
+              Nearest Station
+            </SortableHeader>
             <SortableHeader field="dateAdded">Date Added</SortableHeader>
           </tr>
         </thead>
@@ -190,6 +203,25 @@ export function PropertyTable({
                 >
                   {property.status}
                 </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {property.nearestStationId ? (
+                  <div>
+                    <div className="font-medium">
+                      {property.nearestStationId
+                        .replace(/-/g, ' ')
+                        .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    </div>
+                    {property.nearestStationDistance && (
+                      <div className="text-xs text-gray-500">
+                        {property.nearestStationDistance}m,{' '}
+                        {property.nearestStationWalkingTime || 0}min walk
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  'N/A'
+                )}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 {formatDate(property.dateAdded)}

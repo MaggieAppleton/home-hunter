@@ -37,6 +37,13 @@ router.get('/', (req, res) => {
       dateViewed: property.date_viewed,
       createdAt: property.created_at,
       updatedAt: property.updated_at,
+      // Station distance fields
+      nearestStationId: property.nearest_station_id,
+      nearestStationDistance: property.nearest_station_distance,
+      nearestStationWalkingTime: property.nearest_station_walking_time,
+      allStationsWithin1km: property.all_stations_within_1km
+        ? JSON.parse(property.all_stations_within_1km)
+        : [],
     }));
 
     res.json(properties);
@@ -106,6 +113,13 @@ router.get('/:id', (req, res) => {
       createdAt: property.created_at,
       updatedAt: property.updated_at,
       images,
+      // Station distance fields
+      nearestStationId: property.nearest_station_id,
+      nearestStationDistance: property.nearest_station_distance,
+      nearestStationWalkingTime: property.nearest_station_walking_time,
+      allStationsWithin1km: property.all_stations_within_1km
+        ? JSON.parse(property.all_stations_within_1km)
+        : [],
     };
 
     res.json(result);

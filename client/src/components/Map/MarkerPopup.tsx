@@ -84,12 +84,41 @@ export function MarkerPopup({ property }: MarkerPopupProps) {
         </div>
 
         {/* Train Station */}
-        {property.trainStation && (
+        {(property.trainStation || property.nearestStationId) && (
           <div className="text-sm text-gray-600">
             <span className="font-medium">Nearest Station:</span>
-            <span className="ml-2">{property.trainStation}</span>
+            <span className="ml-2">
+              {property.trainStation || property.nearestStationId}
+              {property.nearestStationDistance && (
+                <span className="text-xs text-gray-500 ml-1">
+                  ({property.nearestStationDistance}m,{' '}
+                  {property.nearestStationWalkingTime || 0}min walk)
+                </span>
+              )}
+            </span>
           </div>
         )}
+
+        {/* All Nearby Stations */}
+        {property.allStationsWithin1km &&
+          property.allStationsWithin1km.length > 1 && (
+            <div className="text-xs text-gray-500">
+              <span className="font-medium">Nearby stations:</span>
+              <div className="mt-1 space-y-0.5">
+                {property.allStationsWithin1km.slice(0, 3).map((station) => (
+                  <div key={station.id} className="flex justify-between">
+                    <span>{station.name}</span>
+                    <span>{station.distance}m</span>
+                  </div>
+                ))}
+                {property.allStationsWithin1km.length > 3 && (
+                  <div className="text-gray-400">
+                    +{property.allStationsWithin1km.length - 3} more
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
         {/* Agency */}
         {property.agency && (
