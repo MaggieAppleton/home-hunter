@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 20, 2025 5:57P
+Updated: September 21, 2025 8:59P
 
 Purpose
 
@@ -90,18 +90,12 @@ Train stations & map enhancements
 - [x] [P2-16] Marker color by status (not contacted, contacted, viewing booked, viewed, rejected, sold)
 - [x] [P2-17] Implement multi-type station visualization with multiple colored dots for stations serving multiple transport types
 
-Data management
-
-- [ ] [P2-18] `GET /api/export` JSON export of all data
-- [ ] [P2-19] `POST /api/import` JSON import of full dataset
-
 Phase 3 — Polish and robustness
 
 UX & responsiveness
 
-- [ ] [P3-01] Responsive layout across breakpoints
-- [ ] [P3-02] Inline table editing for quick updates
-- [ ] [P3-03] Accessible focus states and keyboard navigation
+- [x] [P3-02] Inline table editing
+ - [x] [P3-03] Accessible focus states and keyboard navigation
 
 Validation & errors
 
@@ -112,17 +106,3 @@ Map & performance
 
 - [ ] [P3-06] Fit-to-bounds and selection syncing (table <-> map)
 - [ ] [P3-07] Performance pass: memoization, list virtualization if needed
-
-Docs & DX
-
-- [ ] [P3-08] Update README with data backup/restore, import instructions
-- [ ] [P3-09] Example dataset and screenshots in README
-
-Task-to-commit guidance
-
-- Use the task IDs in commit messages, e.g. "P1-14: Add minimal PropertyTable with name/price/status".
-- Prefer one task per commit. If a change spans multiple tasks, split into sequential commits.
-
-Next task recommendation
-
-- Start with [P0-01] to [P0-04] to get the skeleton running (client + server + health check), then wire up DB migrations ([P1-01] to [P1-04]).

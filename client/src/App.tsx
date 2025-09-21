@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Header } from './components/Layout/Header';
 import { Navigation } from './components/Layout/Navigation';
 import { PropertyTable } from './components/Table/PropertyTable';
@@ -8,13 +8,17 @@ import { PropertyForm } from './components/Forms/PropertyForm';
 import { useProperties } from './hooks/useProperties';
 import { usePropertyFilters } from './hooks/usePropertyFilters';
 import { exportPropertiesToCSV } from './utils/csvExport';
-import type { CreatePropertyRequest } from './types/property';
+import type {
+  CreatePropertyRequest,
+  UpdatePropertyRequest,
+} from './types/property';
 
 type View = 'map' | 'table' | 'add';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('map');
-  const { properties, loading, error, createProperty } = useProperties();
+  const { properties, loading, error, createProperty, updateProperty } =
+    useProperties();
   const { filters, filteredProperties, clearFilters, updateFilters } =
     usePropertyFilters(properties);
 
@@ -31,6 +35,13 @@ function App() {
   const handleExportCSV = () => {
     exportPropertiesToCSV(filteredProperties, 'properties-export.csv');
   };
+
+  const handlePropertyUpdate = useCallback(
+    async (update: UpdatePropertyRequest) => {
+      return await updateProperty(update);
+    },
+    [updateProperty]
+  );
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -132,6 +143,7 @@ function App() {
               properties={filteredProperties}
               loading={loading}
               error={error}
+              onPropertyUpdate={handlePropertyUpdate}
             />
           </div>
         );

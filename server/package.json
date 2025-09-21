@@ -14,9 +14,11 @@
   "description": "",
   "dependencies": {
     "better-sqlite3": "^12.2.0",
+    "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "multer": "^2.0.2",
+    "playwright": "^1.55.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {
