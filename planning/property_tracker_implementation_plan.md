@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 11:30P
+Updated: September 21, 2025 12:25P
 
 Purpose
 
@@ -99,16 +99,15 @@ UX & responsiveness
 
 Frontend image enhancements
 
-- [x] [P3-08] Image carousel component for popup/modal display
 - [ ] [P3-09] Enhanced marker popup with image carousel (replace single cover image)
-- [ ] [P3-10] Property detail modal with full image gallery and property info
-- [ ] [P3-11] Table row image thumbnails with click-to-open modal
+- [x] [P3-10] Property detail modal with full image gallery and property info
+- [x] [P3-11] Table row image thumbnails with click-to-open modal
 - [x] [P3-12] Image upload integration in PropertyForm (add/edit properties)
 
 Notes (2025-09-21):
 
 - Attempting to render an image carousel directly inside Leaflet popups caused the page to freeze. Two contributing factors:
-  - Heavy React re-renders inside Leaflet’s popup DOM lifecycle.
+  - Heavy React re-renders inside Leaflet's popup DOM lifecycle.
   - A property with an invalid longitude (way outside [-180, 180]) likely exacerbated map internals.
 - Current mitigation:
   - Disable images inside popups for now; open full gallery via a dedicated React modal outside the map DOM.
@@ -116,10 +115,19 @@ Notes (2025-09-21):
   - Memoize markers to reduce re-renders.
 - When reintroducing images to popups, keep them lightweight (single thumbnail) and defer carousels to the separate modal.
 
+Image Upload & Display Fixes (2025-09-21):
+
+- Fixed SQLite boolean binding error in image upload endpoint (converted boolean to integer)
+- Resolved property duplication issue caused by multiple cover images
+- Enhanced property details modal with comprehensive property information and image gallery
+- Added thumbnail column to property table with 60px images
+- Fixed image preservation when editing properties in table
+- Updated server endpoints to consistently include full images array in responses
+
 Follow-ups (post-freeze stabilization)
 
 - [ ] [P3-10A] Re-enable MapBounds and train station markers after validating multiple properties have good coordinates
-- [ ] [P3-09A] Reintroduce lightweight popup image (single thumbnail) and open full gallery in external modal
+- [ ] [P3-09A] Reintroduce lightweight popup image (single thumbnail) in map and open full gallery in modal that opens from the table
 - [ ] [P3-09B] Keep carousel out of Leaflet popups; ensure modal uses React portal detached from map DOM
 - [ ] [P1-XX] Add server-side validation to reject/clamp invalid lat/lng on create/update (done for validation; consider clamping as enhancement)
 
