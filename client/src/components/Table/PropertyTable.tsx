@@ -504,26 +504,23 @@ export function PropertyTable({
         ),
         enableSorting: true,
       }),
-      columnHelper.accessor('nearestStationId', {
+      columnHelper.display({
+        id: 'nearestStation',
         header: 'Nearest Station',
         size: 220,
         cell: (info) => {
           const property = info.row.original;
+          const nearestStation = property.nearbyStations?.[0];
           return (
             <div className="text-sm">
-              {property.nearestStationId ? (
+              {nearestStation ? (
                 <div>
                   <div className="font-medium">
-                    {property.nearestStationId
-                      .replace(/-/g, ' ')
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    {nearestStation.name}
                   </div>
-                  {property.nearestStationDistance && (
-                    <div className="text-xs text-gray-500">
-                      {property.nearestStationDistance}m,{' '}
-                      {property.nearestStationWalkingTime || 0}min walk
-                    </div>
-                  )}
+                  <div className="text-xs text-gray-500">
+                    {nearestStation.distance}m, {nearestStation.walkingTime}min walk
+                  </div>
                 </div>
               ) : (
                 <span className="text-gray-400 italic">N/A</span>
@@ -532,6 +529,39 @@ export function PropertyTable({
           );
         },
         enableSorting: false,
+      }),
+      columnHelper.accessor('firstListedDate', {
+        header: 'First Listed',
+        size: 150,
+        cell: (info) => (
+          <EditableCell
+            value={info.getValue()}
+            onSave={(value) =>
+              handleFieldUpdate(info.row.original.id!, 'firstListedDate', value)
+            }
+            type="date"
+          />
+        ),
+        enableSorting: true,
+      }),
+      columnHelper.accessor('timeOnMarketMonths', {
+        header: 'Time on Market',
+        size: 140,
+        cell: (info) => {
+          const value = info.getValue();
+          return (
+            <div className="text-sm">
+              {value !== undefined && value !== null ? (
+                <span className="font-medium">
+                  {value.toFixed(1)} months
+                </span>
+              ) : (
+                <span className="text-gray-400 italic">N/A</span>
+              )}
+            </div>
+          );
+        },
+        enableSorting: true,
       }),
       columnHelper.accessor('dateViewed', {
         header: 'Date Viewed',

@@ -240,33 +240,119 @@ export function PropertyDetailsModal({
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
+                  First Listed Date
+                </label>
+                <div className="text-gray-900">
+                  {property.firstListedDate
+                    ? formatDate(property.firstListedDate)
+                    : 'N/A'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Time on Market
+                </label>
+                <div className="text-gray-900">
+                  {property.timeOnMarketMonths !== undefined &&
+                  property.timeOnMarketMonths !== null
+                    ? `${property.timeOnMarketMonths.toFixed(1)} months`
+                    : 'N/A'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
                   Date Viewed
                 </label>
                 <div className="text-gray-900">
                   {formatDate(property.dateViewed)}
                 </div>
               </div>
-
-              {property.nearestStationId && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nearest Station
-                  </label>
-                  <div className="text-gray-900">
-                    {property.nearestStationId
-                      .replace(/-/g, ' ')
-                      .replace(/\b\w/g, (l) => l.toUpperCase())}
-                    {property.nearestStationDistance && (
-                      <span className="text-sm text-gray-500 ml-2">
-                        ({property.nearestStationDistance}m,{' '}
-                        {property.nearestStationWalkingTime || 0}min walk)
-                      </span>
-                    )}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
+
+          {/* Nearby Stations */}
+          {property.nearbyStations && property.nearbyStations.length > 0 && (
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">
+                Nearby Stations
+              </h3>
+              <div className="space-y-3">
+                {property.nearbyStations.map((station, index) => (
+                  <div
+                    key={station.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">
+                        {station.name}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {station.type.charAt(0).toUpperCase() +
+                          station.type.slice(1)}
+                        {station.lines && station.lines.length > 0 && (
+                          <span className="ml-2">
+                            • {station.lines.join(', ')}
+                          </span>
+                        )}
+                        {station.zone && (
+                          <span className="ml-2">• Zone {station.zone}</span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">
+                        {station.distance}m
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {station.walkingTime}min walk
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Nearby Schools */}
+          {property.nearbySchools && property.nearbySchools.length > 0 && (
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">
+                Nearby Schools
+              </h3>
+              <div className="space-y-3">
+                {property.nearbySchools.map((school) => (
+                  <div
+                    key={school.id}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
+                    <div className="flex-1">
+                      <div className="font-medium text-gray-900">
+                        {school.name}
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {school.schoolType} • Ofsted: {school.ofstedRating}
+                        {school.performancePercentage > 0 && (
+                          <span className="ml-2">
+                            • {school.performancePercentage}% performance
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-sm font-medium text-gray-900">
+                        {school.distance}m
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {school.walkingTime}min walk
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Notes */}
           {property.notes && (

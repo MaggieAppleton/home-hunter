@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 3:49P
+Updated: September 21, 2025 3:53P
 
 Purpose
 
@@ -142,9 +142,9 @@ Database schema redesign completed (2025-09-21):
 Frontend updates for new schema:
 
 - [x] [P4-09] Update PropertyForm.tsx to include firstListedDate field
-- [ ] [P4-10] Update PropertyTable.tsx to display firstListedDate and timeOnMarketMonths columns
-- [ ] [P4-11] Update PropertyDetailsModal.tsx to show nearby stations with distances and walking times
-- [ ] [P4-12] Update PropertyDetailsModal.tsx to show nearby schools section (empty state for now)
+- [x] [P4-10] Update PropertyTable.tsx to display firstListedDate and timeOnMarketMonths columns
+- [x] [P4-11] Update PropertyDetailsModal.tsx to show nearby stations with distances and walking times
+- [x] [P4-12] Update PropertyDetailsModal.tsx to show nearby schools section (empty state for now)
 - [ ] [P4-13] Update CSV export to include new fields (firstListedDate, timeOnMarketMonths, nearbyStations)
 - [ ] [P4-14] Update PropertyForm.tsx to handle timeOnMarketMonths as read-only calculated field
 - [ ] [P4-15] Add validation for firstListedDate format (YYYY-MM-DD)
