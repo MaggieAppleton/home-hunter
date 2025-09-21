@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 12:25P
+Updated: September 21, 2025 3:49P
 
 Purpose
 
@@ -99,10 +99,12 @@ UX & responsiveness
 
 Frontend image enhancements
 
-- [ ] [P3-09] Enhanced marker popup with image carousel (replace single cover image)
+- [ ] [P3-09] Single cover image in property popup in map
 - [x] [P3-10] Property detail modal with full image gallery and property info
-- [x] [P3-11] Table row image thumbnails with click-to-open modal
-- [x] [P3-12] Image upload integration in PropertyForm (add/edit properties)
+- [ ] [P3-11] Add ALL property details to modal
+- [ ] [P3-12] Make all property details in modal editable. Change the action button from save coordinates to just "save" and it saves any changed data to the database.
+- [x] [P3-12] Table row image thumbnails with click-to-open modal
+- [x] [P3-13] Image upload integration in PropertyForm (add/edit properties)
 
 Notes (2025-09-21):
 
@@ -123,6 +125,30 @@ Image Upload & Display Fixes (2025-09-21):
 - Added thumbnail column to property table with 60px images
 - Fixed image preservation when editing properties in table
 - Updated server endpoints to consistently include full images array in responses
+
+Phase 4 — New Schema Frontend Updates
+
+Database schema redesign completed (2025-09-21):
+
+- [x] [P4-01] Remove 'features' field from database and frontend
+- [x] [P4-02] Add firstListedDate and timeOnMarketMonths fields to database
+- [x] [P4-03] Add nearbyStations array with automatic distance calculation
+- [x] [P4-04] Add nearbySchools array (ready for future school data)
+- [x] [P4-05] Implement automatic time-on-market calculation
+- [x] [P4-06] Fix train station distance calculation to trigger on property create/update
+- [x] [P4-07] Update TypeScript types to match new schema
+- [x] [P4-08] Clean up data folder and replace migration system with fresh schema
+
+Frontend updates for new schema:
+
+- [x] [P4-09] Update PropertyForm.tsx to include firstListedDate field
+- [ ] [P4-10] Update PropertyTable.tsx to display firstListedDate and timeOnMarketMonths columns
+- [ ] [P4-11] Update PropertyDetailsModal.tsx to show nearby stations with distances and walking times
+- [ ] [P4-12] Update PropertyDetailsModal.tsx to show nearby schools section (empty state for now)
+- [ ] [P4-13] Update CSV export to include new fields (firstListedDate, timeOnMarketMonths, nearbyStations)
+- [ ] [P4-14] Update PropertyForm.tsx to handle timeOnMarketMonths as read-only calculated field
+- [ ] [P4-15] Add validation for firstListedDate format (YYYY-MM-DD)
+- [ ] [P4-16] Update property table sorting to include new date and numeric fields
 
 Follow-ups (post-freeze stabilization)
 

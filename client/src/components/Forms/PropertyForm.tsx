@@ -233,6 +233,7 @@ export function PropertyForm({
     mapReference: '',
     notes: '',
     dateViewed: '',
+    firstListedDate: '',
   });
 
   const [images, setImages] = useState<PropertyImage[]>([]);
@@ -258,6 +259,7 @@ export function PropertyForm({
         dateViewed: property.dateViewed
           ? property.dateViewed.toISOString().split('T')[0]
           : '',
+        firstListedDate: property.firstListedDate || '',
       });
       setImages(property.images || []);
     }
@@ -292,6 +294,7 @@ export function PropertyForm({
       dateViewed: formData.dateViewed
         ? new Date(formData.dateViewed)
         : undefined,
+      firstListedDate: formData.firstListedDate || undefined,
     };
 
     // For new properties, we need to pass the selected files to upload after creation
@@ -572,6 +575,26 @@ export function PropertyForm({
                   }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="TQ 295 770"
+                />
+              </div>
+
+              {/* First Listed Date */}
+              <div className="col-span-3">
+                <label
+                  htmlFor="firstListedDate"
+                  className="block text-sm font-medium text-gray-700"
+                >
+                  First Listed Date
+                </label>
+                <input
+                  type="date"
+                  name="firstListedDate"
+                  id="firstListedDate"
+                  value={formData.firstListedDate}
+                  onChange={(e) =>
+                    handleInputChange('firstListedDate', e.target.value)
+                  }
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
 
