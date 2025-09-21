@@ -6,6 +6,23 @@ import type {
 } from '../../types/property';
 import { ImageUpload } from './ImageUpload';
 
+// Helper function to validate date string format (YYYY-MM-DD)
+function isValidDateString(dateString: string): boolean {
+  if (!dateString) return false;
+
+  // Check if the string matches YYYY-MM-DD format
+  const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateRegex.test(dateString)) return false;
+
+  // Check if it's a valid date
+  const date = new Date(dateString);
+  return (
+    date instanceof Date &&
+    !isNaN(date.getTime()) &&
+    date.toISOString().split('T')[0] === dateString
+  );
+}
+
 // File selector component for new properties
 interface FileSelectorProps {
   selectedFiles: File[];
@@ -267,6 +284,15 @@ export function PropertyForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Validate firstListedDate format if provided
+    if (
+      formData.firstListedDate &&
+      !isValidDateString(formData.firstListedDate)
+    ) {
+      onError?.('First listed date must be in YYYY-MM-DD format');
+      return;
+    }
 
     // Convert price from pounds to pence
     const priceInPence = formData.price
@@ -594,8 +620,19 @@ export function PropertyForm({
                   onChange={(e) =>
                     handleInputChange('firstListedDate', e.target.value)
                   }
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  className={`mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm ${
+                    formData.firstListedDate &&
+                    !isValidDateString(formData.firstListedDate)
+                      ? 'border-red-300 focus:border-red-500 focus:ring-red-500'
+                      : ''
+                  }`}
                 />
+                {formData.firstListedDate &&
+                  !isValidDateString(formData.firstListedDate) && (
+                    <p className="mt-1 text-sm text-red-600">
+                      Please enter a valid date in YYYY-MM-DD format
+                    </p>
+                  )}
               </div>
 
               {/* Time on Market (Read-only) */}

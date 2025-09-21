@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 3:54P
+Updated: September 21, 2025 3:59P
 
 Purpose
 
@@ -147,8 +147,8 @@ Frontend updates for new schema:
 - [x] [P4-12] Update PropertyDetailsModal.tsx to show nearby schools section (empty state for now)
 - [x] [P4-13] Update CSV export to include new fields (firstListedDate, timeOnMarketMonths, nearbyStations)
 - [x] [P4-14] Update PropertyForm.tsx to handle timeOnMarketMonths as read-only calculated field
-- [ ] [P4-15] Add validation for firstListedDate format (YYYY-MM-DD)
-- [ ] [P4-16] Update property table sorting to include new date and numeric fields
+- [x] [P4-15] Add validation for firstListedDate format (YYYY-MM-DD)
+- [x] [P4-16] Update property table sorting to include new date and numeric fields
 
 Follow-ups (post-freeze stabilization)
 
