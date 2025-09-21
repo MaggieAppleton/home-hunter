@@ -25,6 +25,7 @@ function App() {
     createProperty,
     updateProperty,
     deleteProperty,
+    refetch,
   } = useProperties();
   const { filters, filteredProperties, clearFilters, updateFilters } =
     usePropertyFilters(properties);
@@ -41,7 +42,7 @@ function App() {
         try {
           await api.images.upload(newProperty.id!, data.selectedFiles);
           // Refresh properties to get updated property with images
-          // The useProperties hook should automatically refresh
+          await refetch();
         } catch (imageError) {
           console.error('Failed to upload images:', imageError);
           // TODO: Show error toast for image upload failure
