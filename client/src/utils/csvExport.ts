@@ -27,10 +27,24 @@ export function propertiesToCSV(properties: Property[]): string {
     'Date Added',
     'Date Viewed',
     'Property Link',
+    'First Listed Date',
+    'Time on Market (Months)',
+    'Nearby Stations',
   ];
 
   // Convert properties to CSV rows
   const rows = properties.map((property) => {
+    // Format nearby stations as a readable string
+    const nearbyStationsText = property.nearbyStations
+      ? property.nearbyStations
+          .slice(0, 3) // Show only the 3 closest stations
+          .map(
+            (station) =>
+              `${station.name} (${station.distance.toFixed(1)}m, ${station.walkingTime}min)`
+          )
+          .join('; ')
+      : '';
+
     return [
       escapeCSVField(property.name),
       property.price ? formatPrice(property.price) : '',
@@ -48,6 +62,9 @@ export function propertiesToCSV(properties: Property[]): string {
       formatDate(property.dateAdded),
       property.dateViewed ? formatDate(property.dateViewed) : '',
       escapeCSVField(property.link || ''),
+      property.firstListedDate || '',
+      property.timeOnMarketMonths ? property.timeOnMarketMonths.toString() : '',
+      escapeCSVField(nearbyStationsText),
     ];
   });
 

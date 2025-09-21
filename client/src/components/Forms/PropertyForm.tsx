@@ -598,6 +598,30 @@ export function PropertyForm({
                 />
               </div>
 
+              {/* Time on Market (Read-only) */}
+              {property && property.timeOnMarketMonths !== undefined && (
+                <div className="col-span-3">
+                  <label
+                    htmlFor="timeOnMarketMonths"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Time on Market (Months)
+                  </label>
+                  <input
+                    type="text"
+                    name="timeOnMarketMonths"
+                    id="timeOnMarketMonths"
+                    value={`${property.timeOnMarketMonths.toFixed(1)} months`}
+                    readOnly
+                    disabled
+                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-600 sm:text-sm"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    Calculated automatically from first listed date
+                  </p>
+                </div>
+              )}
+
               {/* Date Viewed */}
               <div className="col-span-3">
                 <label
