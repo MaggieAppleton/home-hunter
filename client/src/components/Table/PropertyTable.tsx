@@ -8,12 +8,15 @@ import {
 } from '@tanstack/react-table';
 import type { Property, UpdatePropertyRequest } from '../../types/property';
 import { formatDate } from '../../utils/formatting';
+import { PropertyDetailsModal } from '../PropertyDetailsModal';
+import { ImageUpload } from '../Forms/ImageUpload';
 
 interface PropertyTableProps {
   properties: Property[];
   loading: boolean;
   error: string | null;
   onPropertyUpdate?: (property: UpdatePropertyRequest) => Promise<Property>;
+  onPropertyDelete?: (propertyId: number) => Promise<void>;
 }
 
 type SortingState = Array<{
@@ -196,6 +199,52 @@ function EditableCell({
   );
 }
 
+// Confirmation Dialog Component
+interface ConfirmDialogProps {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  confirmText?: string;
+  cancelText?: string;
+}
+
+function ConfirmDialog({
+  isOpen,
+  title,
+  message,
+  onConfirm,
+  onCancel,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+}: ConfirmDialogProps) {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+        <h3 className="text-lg font-medium text-gray-900 mb-2">{title}</h3>
+        <p className="text-sm text-gray-500 mb-6">{message}</p>
+        <div className="flex justify-end space-x-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // Column Helper
 const columnHelper = createColumnHelper<Property>();
 
@@ -204,8 +253,34 @@ export function PropertyTable({
   loading,
   error,
   onPropertyUpdate,
+  onPropertyDelete,
 }: PropertyTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    propertyId: number | null;
+    propertyName: string;
+  }>({
+    isOpen: false,
+    propertyId: null,
+    propertyName: '',
+  });
+
+  const [imageModal, setImageModal] = useState<{
+    isOpen: boolean;
+    property: Property | null;
+  }>({
+    isOpen: false,
+    property: null,
+  });
+
+  const [detailsModal, setDetailsModal] = useState<{
+    isOpen: boolean;
+    property: Property | null;
+  }>({
+    isOpen: false,
+    property: null,
+  });
 
   const handleFieldUpdate = useCallback(
     async (propertyId: number, field: string, value: unknown) => {
@@ -227,8 +302,53 @@ export function PropertyTable({
         console.error('Error updating property:', error);
       }
     },
-    [onPropertyUpdate]
+    [] // eslint-disable-line react-hooks/exhaustive-deps
   );
+
+  const handleDeleteClick = useCallback(
+    (propertyId: number, propertyName: string) => {
+      setDeleteDialog({
+        isOpen: true,
+        propertyId,
+        propertyName,
+      });
+    },
+    []
+  );
+
+  const handleDeleteConfirm = useCallback(async () => {
+    if (deleteDialog.propertyId && onPropertyDelete) {
+      try {
+        await onPropertyDelete(deleteDialog.propertyId);
+        setDeleteDialog({ isOpen: false, propertyId: null, propertyName: '' });
+      } catch (error) {
+        console.error('Error deleting property:', error);
+      }
+    }
+  }, [deleteDialog.propertyId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleDeleteCancel = useCallback(() => {
+    setDeleteDialog({ isOpen: false, propertyId: null, propertyName: '' });
+  }, []);
+
+  const handleImageManageClick = useCallback((property: Property) => {
+    setImageModal({
+      isOpen: true,
+      property,
+    });
+  }, []);
+
+  const handleImageModalClose = useCallback(() => {
+    setImageModal({ isOpen: false, property: null });
+  }, []);
+
+  const handleDetailsOpen = useCallback((property: Property) => {
+    setDetailsModal({ isOpen: true, property });
+  }, []);
+
+  const handleDetailsClose = useCallback(() => {
+    setDetailsModal({ isOpen: false, property: null });
+  }, []);
 
   const columns = useMemo(
     () => [
@@ -466,8 +586,102 @@ export function PropertyTable({
         cell: (info) => formatDate(info.getValue()),
         enableSorting: true,
       }),
+      // Actions column
+      columnHelper.display({
+        id: 'actions',
+        header: 'Actions',
+        size: 100,
+        cell: (info) => {
+          const property = info.row.original;
+          return (
+            <div className="flex justify-center space-x-1">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDetailsOpen(property);
+                }}
+                className="text-gray-600 hover:text-gray-800 hover:bg-gray-50 p-1 rounded transition-colors"
+                title="View/Edit details"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleImageManageClick(property);
+                }}
+                className="text-blue-600 hover:text-blue-800 hover:bg-blue-50 p-1 rounded transition-colors"
+                title="Manage images"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleDeleteClick(
+                    property.id!,
+                    property.name || 'Unknown Property'
+                  );
+                }}
+                className="text-red-600 hover:text-red-800 hover:bg-red-50 p-1 rounded transition-colors"
+                title="Delete property"
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          );
+        },
+        enableSorting: false,
+      }),
     ],
-    [handleFieldUpdate]
+    [
+      handleFieldUpdate,
+      handleDeleteClick,
+      handleImageManageClick,
+      handleDetailsOpen,
+    ]
   );
 
   const table = useReactTable({
@@ -520,103 +734,177 @@ export function PropertyTable({
   }
 
   return (
-    <div className="overflow-x-auto border border-gray-200 rounded-lg">
-      <table className="min-w-full table-fixed divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <th
-                  key={header.id}
-                  className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 sticky top-0"
-                  style={{ width: header.getSize() }}
-                  tabIndex={header.column.getCanSort() ? 0 : -1}
-                  role={header.column.getCanSort() ? 'button' : undefined}
-                  aria-sort={
-                    header.column.getIsSorted() === 'asc'
-                      ? 'ascending'
-                      : header.column.getIsSorted() === 'desc'
-                        ? 'descending'
-                        : 'none'
-                  }
-                  onKeyDown={(e) => {
-                    if (!header.column.getCanSort()) return;
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      header.column.toggleSorting(undefined, true);
-                    }
-                    if (e.key === 'ArrowUp') {
-                      e.preventDefault();
-                      header.column.toggleSorting(false, true);
-                    }
-                    if (e.key === 'ArrowDown') {
-                      e.preventDefault();
-                      header.column.toggleSorting(true, true);
-                    }
-                  }}
+    <>
+      <ConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        title="Delete Property"
+        message={`Are you sure you want to delete "${deleteDialog.propertyName}"? This action cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
+
+      {/* Details Modal */}
+      <PropertyDetailsModal
+        property={detailsModal.property}
+        isOpen={detailsModal.isOpen}
+        onClose={handleDetailsClose}
+        onSave={async (update) => {
+          if (onPropertyUpdate) {
+            await onPropertyUpdate(update);
+          }
+        }}
+      />
+
+      {/* Image Management Modal */}
+      {imageModal.isOpen && imageModal.property && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-20 mx-auto p-5 border w-11/12 md:w-3/4 lg:w-1/2 shadow-lg rounded-md bg-white">
+            <div className="mt-3">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Manage Images - {imageModal.property.name}
+                </h3>
+                <button
+                  onClick={handleImageModalClose}
+                  className="text-gray-400 hover:text-gray-600"
                 >
-                  {header.isPlaceholder ? null : (
-                    <div
-                      className={
-                        header.column.getCanSort()
-                          ? 'cursor-pointer select-none flex items-center space-x-1 hover:text-gray-700'
-                          : ''
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              <ImageUpload
+                propertyId={imageModal.property.id!}
+                existingImages={imageModal.property.images}
+                onImagesChange={(images) => {
+                  // Update the property in the local state
+                  // This is a simplified approach - in a real app you might want to refresh from server
+                  const updatedProperty = { ...imageModal.property!, images };
+                  setImageModal({ ...imageModal, property: updatedProperty });
+                }}
+                onError={(error) => {
+                  console.error('Image upload error:', error);
+                  // TODO: Show error toast
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+        <table className="min-w-full table-fixed divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <th
+                    key={header.id}
+                    className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 sticky top-0"
+                    style={{ width: header.getSize() }}
+                    tabIndex={header.column.getCanSort() ? 0 : -1}
+                    role={header.column.getCanSort() ? 'button' : undefined}
+                    aria-sort={
+                      header.column.getIsSorted() === 'asc'
+                        ? 'ascending'
+                        : header.column.getIsSorted() === 'desc'
+                          ? 'descending'
+                          : 'none'
+                    }
+                    onKeyDown={(e) => {
+                      if (!header.column.getCanSort()) return;
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        header.column.toggleSorting(undefined, true);
                       }
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      <span>
-                        {flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                      </span>
-                      {header.column.getCanSort() && (
-                        <span className="flex flex-col">
-                          <svg
-                            className={`w-3 h-3 ${
-                              header.column.getIsSorted() === 'asc'
-                                ? 'text-gray-900'
-                                : 'text-gray-400'
-                            }`}
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-                          </svg>
-                          <svg
-                            className={`w-3 h-3 -mt-1 ${
-                              header.column.getIsSorted() === 'desc'
-                                ? 'text-gray-900'
-                                : 'text-gray-400'
-                            }`}
-                            fill="currentColor"
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
-                          </svg>
+                      if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        header.column.toggleSorting(false, true);
+                      }
+                      if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        header.column.toggleSorting(true, true);
+                      }
+                    }}
+                  >
+                    {header.isPlaceholder ? null : (
+                      <div
+                        className={
+                          header.column.getCanSort()
+                            ? 'cursor-pointer select-none flex items-center space-x-1 hover:text-gray-700'
+                            : ''
+                        }
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        <span>
+                          {flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
                         </span>
+                        {header.column.getCanSort() && (
+                          <span className="flex flex-col">
+                            <svg
+                              className={`w-3 h-3 ${
+                                header.column.getIsSorted() === 'asc'
+                                  ? 'text-gray-900'
+                                  : 'text-gray-400'
+                              }`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
+                            </svg>
+                            <svg
+                              className={`w-3 h-3 -mt-1 ${
+                                header.column.getIsSorted() === 'desc'
+                                  ? 'text-gray-900'
+                                  : 'text-gray-400'
+                              }`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                            >
+                              <path d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z" />
+                            </svg>
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            ))}
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {table.getRowModel().rows.map((row) => (
+              <tr key={row.id} className="hover:bg-gray-50">
+                {row.getVisibleCells().map((cell) => (
+                  <td key={cell.id} className="px-3 py-4 whitespace-nowrap">
+                    <div style={{ width: cell.column.getSize() }}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
                       )}
                     </div>
-                  )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {table.getRowModel().rows.map((row) => (
-            <tr key={row.id} className="hover:bg-gray-50">
-              {row.getVisibleCells().map((cell) => (
-                <td key={cell.id} className="px-3 py-4 whitespace-nowrap">
-                  <div style={{ width: cell.column.getSize() }}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </div>
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }

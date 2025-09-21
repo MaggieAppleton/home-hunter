@@ -1,8 +1,15 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import type { Property, PropertyFilters } from '../types/property';
 
 export function usePropertyFilters(properties: Property[]) {
   const [filters, setFilters] = useState<PropertyFilters>({});
+
+  const areFiltersEqual = (a: PropertyFilters, b: PropertyFilters) => {
+    return (
+      (a.status || '') === (b.status || '') &&
+      (a.search || '') === (b.search || '')
+    );
+  };
 
   const filteredProperties = useMemo(() => {
     return properties.filter((property) => {
@@ -34,13 +41,15 @@ export function usePropertyFilters(properties: Property[]) {
     });
   }, [properties, filters]);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({});
-  };
+  }, []);
 
-  const updateFilters = (newFilters: PropertyFilters) => {
-    setFilters(newFilters);
-  };
+  const updateFilters = useCallback((newFilters: PropertyFilters) => {
+    setFilters((prev) =>
+      areFiltersEqual(prev, newFilters) ? prev : newFilters
+    );
+  }, []);
 
   return {
     filters,

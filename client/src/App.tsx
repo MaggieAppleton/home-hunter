@@ -8,6 +8,7 @@ import { PropertyForm } from './components/Forms/PropertyForm';
 import { useProperties } from './hooks/useProperties';
 import { usePropertyFilters } from './hooks/usePropertyFilters';
 import { exportPropertiesToCSV } from './utils/csvExport';
+import { api } from './utils/api';
 import type {
   CreatePropertyRequest,
   UpdatePropertyRequest,
@@ -17,14 +18,36 @@ type View = 'map' | 'table' | 'add';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('map');
-  const { properties, loading, error, createProperty, updateProperty } =
-    useProperties();
+  const {
+    properties,
+    loading,
+    error,
+    createProperty,
+    updateProperty,
+    deleteProperty,
+  } = useProperties();
   const { filters, filteredProperties, clearFilters, updateFilters } =
     usePropertyFilters(properties);
 
-  const handleAddProperty = async (data: CreatePropertyRequest) => {
+  const handleAddProperty = async (
+    data: CreatePropertyRequest & { selectedFiles?: File[] }
+  ) => {
     try {
-      await createProperty(data);
+      // Create the property first
+      const newProperty = await createProperty(data);
+
+      // Upload images if any were selected
+      if (data.selectedFiles && data.selectedFiles.length > 0) {
+        try {
+          await api.images.upload(newProperty.id!, data.selectedFiles);
+          // Refresh properties to get updated property with images
+          // The useProperties hook should automatically refresh
+        } catch (imageError) {
+          console.error('Failed to upload images:', imageError);
+          // TODO: Show error toast for image upload failure
+        }
+      }
+
       setCurrentView('table'); // Switch to table view to see the new property
     } catch (error) {
       console.error('Failed to create property:', error);
@@ -36,12 +59,8 @@ function App() {
     exportPropertiesToCSV(filteredProperties, 'properties-export.csv');
   };
 
-  const handlePropertyUpdate = useCallback(
-    async (update: UpdatePropertyRequest) => {
-      return await updateProperty(update);
-    },
-    [updateProperty]
-  );
+  const handlePropertyUpdate = updateProperty;
+  const handlePropertyDelete = deleteProperty;
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -144,6 +163,7 @@ function App() {
               loading={loading}
               error={error}
               onPropertyUpdate={handlePropertyUpdate}
+              onPropertyDelete={handlePropertyDelete}
             />
           </div>
         );

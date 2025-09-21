@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { PropertyFilters } from '../../types/property';
 
 interface TableFiltersProps {
@@ -23,16 +23,20 @@ export function TableFilters({
   onClearFilters,
 }: TableFiltersProps) {
   const [localSearch, setLocalSearch] = useState(filters.search || '');
+  const lastEmittedSearchRef = useRef<string>(filters.search || '');
 
   const handleSearchChange = (value: string) => {
     setLocalSearch(value);
   };
 
-  // Debounce search input
+  // Debounce search input and avoid emitting if value didn't change
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      onFiltersChange({ ...filters, search: localSearch });
-    }, 300);
+      if (lastEmittedSearchRef.current !== localSearch) {
+        lastEmittedSearchRef.current = localSearch;
+        onFiltersChange({ ...filters, search: localSearch });
+      }
+    }, 250);
 
     return () => clearTimeout(timeoutId);
   }, [localSearch, filters, onFiltersChange]);

@@ -3,6 +3,25 @@ import { getDatabase } from '../database/connection';
 
 const router = express.Router();
 
+function normalizeNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function validateLatLng(lat: unknown, lng: unknown): string | null {
+  const nlat = normalizeNumber(lat);
+  const nlng = normalizeNumber(lng);
+  if (nlat === null && nlng === null) return null; // both absent -> ok
+  if (nlat === null || nlng === null)
+    return 'Latitude and longitude must both be provided as numbers';
+  if (nlat < -90 || nlat > 90) return 'Latitude must be between -90 and 90';
+  if (nlng < -180 || nlng > 180)
+    return 'Longitude must be between -180 and 180';
+  return null;
+}
+
 // GET /api/properties - List all properties
 router.get('/', (req, res) => {
   try {
@@ -156,6 +175,14 @@ router.post('/', (req, res) => {
       return res.status(400).json({ error: 'Property name is required' });
     }
 
+    // Validate coordinates if provided
+    {
+      const coordError = validateLatLng(gpsLat, gpsLng);
+      if (coordError) {
+        return res.status(400).json({ error: coordError });
+      }
+    }
+
     const insertStmt = db.prepare(`
       INSERT INTO properties (
         name, price, square_feet, bedrooms, bathrooms, status,
@@ -175,8 +202,8 @@ router.post('/', (req, res) => {
       features ? JSON.stringify(features) : null,
       link || null,
       agency || null,
-      gpsLat || null,
-      gpsLng || null,
+      normalizeNumber(gpsLat) ?? null,
+      normalizeNumber(gpsLng) ?? null,
       mapReference || null,
       notes || null,
       dateViewed || null
@@ -240,17 +267,47 @@ router.put('/:id', (req, res) => {
       dateViewed,
     } = req.body;
 
-    // Check if property exists
-    const checkStmt = db.prepare('SELECT id FROM properties WHERE id = ?');
-    const existing = checkStmt.get(id);
+    // Load existing property to support partial updates
+    const existingStmt = db.prepare('SELECT * FROM properties WHERE id = ?');
+    const existing = existingStmt.get(id) as any;
 
     if (!existing) {
       return res.status(404).json({ error: 'Property not found' });
     }
 
-    // Validate required fields
-    if (!name) {
+    // Compute effective values (fallback to existing when undefined)
+    const effName = name ?? existing.name;
+    const effPrice = price ?? existing.price;
+    const effSquareFeet = squareFeet ?? existing.square_feet;
+    const effBedrooms = bedrooms ?? existing.bedrooms;
+    const effBathrooms = bathrooms ?? existing.bathrooms;
+    const effStatus = status ?? existing.status ?? 'Not contacted';
+    const effTrainStation = trainStation ?? existing.train_station;
+    const effFeatures =
+      features !== undefined
+        ? features
+          ? JSON.stringify(features)
+          : null
+        : existing.features; // keep existing JSON string
+    const effLink = link ?? existing.link;
+    const effAgency = agency ?? existing.agency;
+    const effGpsLat = normalizeNumber(gpsLat) ?? existing.gps_lat;
+    const effGpsLng = normalizeNumber(gpsLng) ?? existing.gps_lng;
+    const effMapReference = mapReference ?? existing.map_reference;
+    const effNotes = notes ?? existing.notes;
+    const effDateViewed = dateViewed ?? existing.date_viewed;
+
+    // Validate required fields after merging
+    if (!effName) {
       return res.status(400).json({ error: 'Property name is required' });
+    }
+
+    // Validate coordinates after merging
+    {
+      const coordError = validateLatLng(effGpsLat, effGpsLng);
+      if (coordError) {
+        return res.status(400).json({ error: coordError });
+      }
     }
 
     const updateStmt = db.prepare(`
@@ -262,21 +319,21 @@ router.put('/:id', (req, res) => {
     `);
 
     updateStmt.run(
-      name,
-      price || null,
-      squareFeet || null,
-      bedrooms || null,
-      bathrooms || null,
-      status || 'Not contacted',
-      trainStation || null,
-      features ? JSON.stringify(features) : null,
-      link || null,
-      agency || null,
-      gpsLat || null,
-      gpsLng || null,
-      mapReference || null,
-      notes || null,
-      dateViewed || null,
+      effName,
+      effPrice || null,
+      effSquareFeet || null,
+      effBedrooms || null,
+      effBathrooms || null,
+      effStatus,
+      effTrainStation || null,
+      effFeatures,
+      effLink || null,
+      effAgency || null,
+      effGpsLat ?? null,
+      effGpsLng ?? null,
+      effMapReference || null,
+      effNotes || null,
+      effDateViewed || null,
       id
     );
 

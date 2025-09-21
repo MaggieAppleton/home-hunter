@@ -2,6 +2,8 @@ import { Marker, Popup } from 'react-leaflet';
 import { Icon } from 'leaflet';
 import type { Property } from '../../types/property';
 import { MarkerPopup } from './MarkerPopup';
+import React from 'react';
+import { useMemo } from 'react';
 
 // Create custom icons for different property statuses
 const createStatusIcon = (_status: Property['status'], color: string) => {
@@ -32,12 +34,15 @@ interface PropertyMarkerProps {
   property: Property;
 }
 
-export function PropertyMarker({ property }: PropertyMarkerProps) {
+function PropertyMarkerInner({ property }: PropertyMarkerProps) {
   if (!property.gpsLat || !property.gpsLng) {
     return null;
   }
 
-  const icon = createStatusIcon(property.status, statusColors[property.status]);
+  const icon = useMemo(
+    () => createStatusIcon(property.status, statusColors[property.status]),
+    [property.status]
+  );
 
   return (
     <Marker position={[property.gpsLat, property.gpsLng]} icon={icon}>
@@ -47,3 +52,5 @@ export function PropertyMarker({ property }: PropertyMarkerProps) {
     </Marker>
   );
 }
+
+export const PropertyMarker = React.memo(PropertyMarkerInner);

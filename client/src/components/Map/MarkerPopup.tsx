@@ -1,5 +1,6 @@
 import type { Property } from '../../types/property';
 import { api } from '../../utils/api';
+import { useState } from 'react';
 
 interface MarkerPopupProps {
   property: Property;
@@ -25,19 +26,15 @@ const statusColors = {
 };
 
 export function MarkerPopup({ property }: MarkerPopupProps) {
+  const [showImageModal, setShowImageModal] = useState(false);
+
+  const hasImages = false; // Temporarily disable images in map popovers for debugging freeze
+
   return (
     <div className="p-2 min-w-[200px]">
       <div className="space-y-2">
-        {/* Cover Image */}
-        {property.coverImage && (
-          <div className="w-full h-32 rounded-lg overflow-hidden bg-gray-100">
-            <img
-              src={api.images.getImageUrl(property.coverImage)}
-              alt={property.name}
-              className="w-full h-full object-cover"
-            />
-          </div>
-        )}
+        {/* Images */}
+        {/* Images temporarily disabled for debugging */}
 
         {/* Property Name */}
         <h3 className="font-semibold text-gray-900 text-sm leading-tight">
@@ -142,6 +139,16 @@ export function MarkerPopup({ property }: MarkerPopupProps) {
           </div>
         )}
       </div>
+
+      {/* Image Modal */}
+      {hasImages && (
+        <ImageCarouselModal
+          images={property.images}
+          isOpen={showImageModal}
+          onClose={() => setShowImageModal(false)}
+          title={`${property.name} - Images`}
+        />
+      )}
     </div>
   );
 }

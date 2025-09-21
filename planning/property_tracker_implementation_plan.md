@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 8:59P
+Updated: September 21, 2025 11:30P
 
 Purpose
 
@@ -95,7 +95,33 @@ Phase 3 — Polish and robustness
 UX & responsiveness
 
 - [x] [P3-02] Inline table editing
- - [x] [P3-03] Accessible focus states and keyboard navigation
+- [x] [P3-03] Accessible focus states and keyboard navigation
+
+Frontend image enhancements
+
+- [x] [P3-08] Image carousel component for popup/modal display
+- [ ] [P3-09] Enhanced marker popup with image carousel (replace single cover image)
+- [ ] [P3-10] Property detail modal with full image gallery and property info
+- [ ] [P3-11] Table row image thumbnails with click-to-open modal
+- [x] [P3-12] Image upload integration in PropertyForm (add/edit properties)
+
+Notes (2025-09-21):
+
+- Attempting to render an image carousel directly inside Leaflet popups caused the page to freeze. Two contributing factors:
+  - Heavy React re-renders inside Leaflet’s popup DOM lifecycle.
+  - A property with an invalid longitude (way outside [-180, 180]) likely exacerbated map internals.
+- Current mitigation:
+  - Disable images inside popups for now; open full gallery via a dedicated React modal outside the map DOM.
+  - Add strict coordinate validation in the map layer to avoid rendering invalid markers.
+  - Memoize markers to reduce re-renders.
+- When reintroducing images to popups, keep them lightweight (single thumbnail) and defer carousels to the separate modal.
+
+Follow-ups (post-freeze stabilization)
+
+- [ ] [P3-10A] Re-enable MapBounds and train station markers after validating multiple properties have good coordinates
+- [ ] [P3-09A] Reintroduce lightweight popup image (single thumbnail) and open full gallery in external modal
+- [ ] [P3-09B] Keep carousel out of Leaflet popups; ensure modal uses React portal detached from map DOM
+- [ ] [P1-XX] Add server-side validation to reject/clamp invalid lat/lng on create/update (done for validation; consider clamping as enhancement)
 
 Validation & errors
 

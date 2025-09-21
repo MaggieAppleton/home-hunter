@@ -21,7 +21,7 @@ export function useProperties(): UsePropertiesResult {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProperties = useCallback(async () => {
+  const fetchProperties = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -45,7 +45,7 @@ export function useProperties(): UsePropertiesResult {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   const createProperty = useCallback(
     async (data: CreatePropertyRequest): Promise<Property> => {
@@ -118,7 +118,7 @@ export function useProperties(): UsePropertiesResult {
   // Fetch properties on mount
   useEffect(() => {
     fetchProperties();
-  }, [fetchProperties]);
+  }, []);
 
   return {
     properties,

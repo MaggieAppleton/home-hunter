@@ -104,7 +104,7 @@ router.post(
 );
 
 // GET /api/images/:filename - Serve image file
-router.get('/:filename', (req, res) => {
+router.get('/images/:filename', (req, res) => {
   try {
     const { filename } = req.params;
     const imagePath = path.join(__dirname, '../../../data/images', filename);
@@ -138,7 +138,7 @@ router.get('/:filename', (req, res) => {
 });
 
 // DELETE /api/images/:id - Delete image
-router.delete('/:id', (req, res) => {
+router.delete('/images/:id', (req, res) => {
   try {
     const db = getDatabase();
     const { id } = req.params;
@@ -195,7 +195,7 @@ router.delete('/:id', (req, res) => {
 });
 
 // PUT /api/images/:id/cover - Set as cover image
-router.put('/:id/cover', (req, res) => {
+router.put('/images/:id/cover', (req, res) => {
   try {
     const db = getDatabase();
     const { id } = req.params;
