@@ -3,7 +3,8 @@ import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { LatLngBounds } from 'leaflet';
 import type { Property } from '../../types/property';
 import { PropertyMarker } from './PropertyMarker';
-// import { useTrainStations } from '../../hooks/useTrainStations';
+import { useTrainStations } from '../../hooks/useTrainStations';
+import { TrainStationMarker } from './TrainStationMarker';
 import 'leaflet/dist/leaflet.css';
 
 interface PropertyMapProps {
@@ -13,7 +14,6 @@ interface PropertyMapProps {
 }
 
 // Component to fit map bounds to show all properties
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function MapBounds({ properties }: { properties: Property[] }) {
   const map = useMap();
 
@@ -50,7 +50,7 @@ export function PropertyMap({
   zoom = 11,
 }: PropertyMapProps) {
   const [showStations, setShowStations] = useState(false);
-  // const { stations, loading: stationsLoading } = useTrainStations();
+  const { stations, loading: stationsLoading } = useTrainStations();
 
   const isValidCoord = (lat?: number, lng?: number) => {
     if (lat == null || lng == null) return false;
@@ -95,8 +95,8 @@ export function PropertyMap({
             url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
           />
 
-          {/* Fit bounds to show all properties - disabled during freeze debug */}
-          {/* <MapBounds properties={propertiesWithLocation} /> */}
+          {/* Fit bounds to show all properties */}
+          <MapBounds properties={propertiesWithLocation} />
 
           {/* Render property markers */}
           {propertiesWithLocation.map((property) => (
@@ -104,12 +104,11 @@ export function PropertyMap({
           ))}
 
           {/* Render train station markers */}
-          {/* Station markers disabled during freeze debug */}
-          {/* {showStations &&
+          {showStations &&
             !stationsLoading &&
             stations.map((station) => (
               <TrainStationMarker key={station.id} station={station} />
-            ))} */}
+            ))}
         </MapContainer>
       </div>
     </div>

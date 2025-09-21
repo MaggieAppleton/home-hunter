@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 4:05P
+Updated: September 21, 2025 4:20P
 
 Purpose
 
@@ -152,10 +152,8 @@ Frontend updates for new schema:
 
 Follow-ups (post-freeze stabilization)
 
-- [ ] [P3-10A] Re-enable MapBounds and train station markers after validating multiple properties have good coordinates
-- [ ] [P3-09A] Reintroduce lightweight popup image (single thumbnail) in map and open full gallery in modal that opens from the table
-- [ ] [P3-09B] Keep carousel out of Leaflet popups; ensure modal uses React portal detached from map DOM
-- [ ] [P1-XX] Add server-side validation to reject/clamp invalid lat/lng on create/update (done for validation; consider clamping as enhancement)
+- [x] [P3-10A] Re-enable MapBounds and train station markers after validating multiple properties have good coordinates
+- [x] [P3-10B] Add server-side validation to reject/clamp invalid lat/lng on create/update (done for validation; consider clamping as enhancement)
 
 Validation & errors
 

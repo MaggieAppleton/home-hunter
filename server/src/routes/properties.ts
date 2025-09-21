@@ -27,6 +27,91 @@ function validateLatLng(lat: unknown, lng: unknown): string | null {
 }
 
 /**
+ * Validate and optionally clamp coordinates to valid ranges
+ * @param lat - Latitude value
+ * @param lng - Longitude value
+ * @param clamp - Whether to clamp out-of-bounds values instead of rejecting them
+ * @returns Object with validation result and potentially clamped coordinates
+ */
+function validateAndClampLatLng(
+  lat: unknown,
+  lng: unknown,
+  clamp: boolean = false
+): { error: string | null; lat: number | null; lng: number | null } {
+  const nlat = normalizeNumber(lat);
+  const nlng = normalizeNumber(lng);
+
+  if (nlat === null && nlng === null) {
+    return { error: null, lat: null, lng: null }; // both absent -> ok
+  }
+
+  if (nlat === null || nlng === null) {
+    return {
+      error: 'Latitude and longitude must both be provided as numbers',
+      lat: null,
+      lng: null,
+    };
+  }
+
+  let finalLat = nlat;
+  let finalLng = nlng;
+  let error: string | null = null;
+
+  // Check latitude bounds
+  if (nlat < -90 || nlat > 90) {
+    if (clamp) {
+      finalLat = Math.max(-90, Math.min(90, nlat));
+      error = `Latitude clamped from ${nlat} to ${finalLat}`;
+    } else {
+      return {
+        error: 'Latitude must be between -90 and 90',
+        lat: null,
+        lng: null,
+      };
+    }
+  }
+
+  // Check longitude bounds
+  if (nlng < -180 || nlng > 180) {
+    if (clamp) {
+      finalLng = Math.max(-180, Math.min(180, nlng));
+      error = error
+        ? `${error}; Longitude clamped from ${nlng} to ${finalLng}`
+        : `Longitude clamped from ${nlng} to ${finalLng}`;
+    } else {
+      return {
+        error: 'Longitude must be between -180 and 180',
+        lat: null,
+        lng: null,
+      };
+    }
+  }
+
+  // Additional validation for South London area (optional bounds check)
+  const southLondonBounds = {
+    minLat: 51.3, // Rough southern boundary
+    maxLat: 51.6, // Rough northern boundary
+    minLng: -0.3, // Rough western boundary
+    maxLng: 0.1, // Rough eastern boundary
+  };
+
+  if (
+    finalLat < southLondonBounds.minLat ||
+    finalLat > southLondonBounds.maxLat ||
+    finalLng < southLondonBounds.minLng ||
+    finalLng > southLondonBounds.maxLng
+  ) {
+    // For South London context, we'll warn but not reject coordinates outside the area
+    // This allows for properties that might be just outside the defined bounds
+    console.warn(
+      `Property coordinates (${finalLat}, ${finalLng}) are outside typical South London bounds`
+    );
+  }
+
+  return { error, lat: finalLat, lng: finalLng };
+}
+
+/**
  * Calculate time on market in months
  */
 function calculateTimeOnMarket(firstListedDate: string | null): number | null {
@@ -293,13 +378,15 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Property name is required' });
     }
 
-    // Validate coordinates if provided
-    {
-      const coordError = validateLatLng(gpsLat, gpsLng);
-      if (coordError) {
-        return res.status(400).json({ error: coordError });
-      }
+    // Validate coordinates if provided (with clamping enabled for robustness)
+    const coordValidation = validateAndClampLatLng(gpsLat, gpsLng, true);
+    if (coordValidation.error && !coordValidation.error.includes('clamped')) {
+      return res.status(400).json({ error: coordValidation.error });
     }
+
+    // Use clamped coordinates if validation passed
+    const finalGpsLat = coordValidation.lat;
+    const finalGpsLng = coordValidation.lng;
 
     // Calculate time on market
     const timeOnMarketMonths = calculateTimeOnMarket(firstListedDate);
@@ -321,8 +408,8 @@ router.post('/', async (req, res) => {
       status || 'Not contacted',
       link || null,
       agency || null,
-      normalizeNumber(gpsLat) ?? null,
-      normalizeNumber(gpsLng) ?? null,
+      finalGpsLat ?? null,
+      finalGpsLng ?? null,
       mapReference || null,
       notes || null,
       dateViewed || null,
@@ -333,8 +420,12 @@ router.post('/', async (req, res) => {
     const propertyId = Number(result.lastInsertRowid);
 
     // Calculate nearby stations and schools if coordinates are provided
-    if (gpsLat && gpsLng) {
-      await updatePropertyNearbyData(propertyId, Number(gpsLat), Number(gpsLng));
+    if (finalGpsLat && finalGpsLng) {
+      await updatePropertyNearbyData(
+        propertyId,
+        Number(finalGpsLat),
+        Number(finalGpsLng)
+      );
     }
 
     // Return the created property
@@ -417,12 +508,20 @@ router.put('/:id', async (req, res) => {
     const effStatus = status ?? existing.status ?? 'Not contacted';
     const effLink = link ?? existing.link;
     const effAgency = agency ?? existing.agency;
-    const effGpsLat = normalizeNumber(gpsLat) ?? existing.gps_lat;
-    const effGpsLng = normalizeNumber(gpsLng) ?? existing.gps_lng;
     const effMapReference = mapReference ?? existing.map_reference;
     const effNotes = notes ?? existing.notes;
     const effDateViewed = dateViewed ?? existing.date_viewed;
     const effFirstListedDate = firstListedDate ?? existing.first_listed_date;
+
+    // Handle coordinates with validation and clamping
+    const rawGpsLat = gpsLat ?? existing.gps_lat;
+    const rawGpsLng = gpsLng ?? existing.gps_lng;
+    const coordValidation = validateAndClampLatLng(rawGpsLat, rawGpsLng, true);
+    if (coordValidation.error && !coordValidation.error.includes('clamped')) {
+      return res.status(400).json({ error: coordValidation.error });
+    }
+    const effGpsLat = coordValidation.lat;
+    const effGpsLng = coordValidation.lng;
 
     // Calculate time on market
     const timeOnMarketMonths = calculateTimeOnMarket(effFirstListedDate);
@@ -430,14 +529,6 @@ router.put('/:id', async (req, res) => {
     // Validate required fields after merging
     if (!effName) {
       return res.status(400).json({ error: 'Property name is required' });
-    }
-
-    // Validate coordinates after merging
-    {
-      const coordError = validateLatLng(effGpsLat, effGpsLng);
-      if (coordError) {
-        return res.status(400).json({ error: coordError });
-      }
     }
 
     const updateStmt = db.prepare(`
@@ -470,7 +561,11 @@ router.put('/:id', async (req, res) => {
 
     // Update nearby stations and schools if coordinates are provided
     if (effGpsLat && effGpsLng) {
-      await updatePropertyNearbyData(Number(id), Number(effGpsLat), Number(effGpsLng));
+      await updatePropertyNearbyData(
+        Number(id),
+        Number(effGpsLat),
+        Number(effGpsLng)
+      );
     }
 
     // Return updated property with all images
