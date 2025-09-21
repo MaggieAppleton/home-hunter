@@ -4,7 +4,7 @@ import type { PropertyImage } from '../../types/property';
 
 interface ImageUploadProps {
   propertyId: number;
-  existingImages: PropertyImage[];
+  existingImages?: PropertyImage[];
   onImagesChange: (images: PropertyImage[]) => void;
   onError: (error: string) => void;
 }
@@ -18,6 +18,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Ensure existingImages is always an array
+  const safeExistingImages = existingImages || [];
 
   const handleFileSelect = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
@@ -54,7 +57,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsUploading(true);
     try {
       const result = await api.images.upload(propertyId, validFiles);
-      onImagesChange([...existingImages, ...result.images]);
+      onImagesChange([...safeExistingImages, ...result.images]);
     } catch (error) {
       onError(
         error instanceof Error ? error.message : 'Failed to upload images'
@@ -67,7 +70,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   const handleDeleteImage = async (imageId: number) => {
     try {
       await api.images.delete(imageId);
-      onImagesChange(existingImages.filter((img) => img.id !== imageId));
+      onImagesChange(safeExistingImages.filter((img) => img.id !== imageId));
     } catch (error) {
       onError(
         error instanceof Error ? error.message : 'Failed to delete image'
@@ -79,7 +82,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     try {
       await api.images.setCover(imageId);
       // Update the images array to reflect the new cover
-      const updatedImages = existingImages.map((img) => ({
+      const updatedImages = safeExistingImages.map((img) => ({
         ...img,
         isCover: img.id === imageId,
       }));
@@ -179,9 +182,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
       </div>
 
       {/* Image Grid */}
-      {existingImages.length > 0 && (
+      {safeExistingImages.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {existingImages.map((image) => (
+          {safeExistingImages.map((image) => (
             <div key={image.id} className="relative group">
               <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
                 <img

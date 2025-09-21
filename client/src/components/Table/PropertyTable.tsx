@@ -10,6 +10,7 @@ import type { Property, UpdatePropertyRequest } from '../../types/property';
 import { formatDate } from '../../utils/formatting';
 import { PropertyDetailsModal } from '../PropertyDetailsModal';
 import { ImageUpload } from '../Forms/ImageUpload';
+import { api } from '../../utils/api';
 
 interface PropertyTableProps {
   properties: Property[];
@@ -352,6 +353,46 @@ export function PropertyTable({
 
   const columns = useMemo(
     () => [
+      // Thumbnail column
+      columnHelper.display({
+        id: 'thumbnail',
+        header: '',
+        size: 80,
+        cell: (info) => {
+          const property = info.row.original;
+          const coverImage =
+            property.images?.find((img) => img.isCover) || property.images?.[0];
+
+          return (
+            <div className="flex justify-center">
+              {coverImage ? (
+                <img
+                  src={api.images.getImageUrl(coverImage.filename)}
+                  alt={property.name}
+                  className="w-12 h-12 object-cover rounded border border-gray-200"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-gray-100 rounded border border-gray-200 flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+              )}
+            </div>
+          );
+        },
+        enableSorting: false,
+      }),
       columnHelper.accessor('name', {
         header: 'Property',
         size: 260,
@@ -788,7 +829,7 @@ export function PropertyTable({
 
               <ImageUpload
                 propertyId={imageModal.property.id!}
-                existingImages={imageModal.property.images}
+                existingImages={imageModal.property.images || []}
                 onImagesChange={(images) => {
                   // Update the property in the local state
                   // This is a simplified approach - in a real app you might want to refresh from server

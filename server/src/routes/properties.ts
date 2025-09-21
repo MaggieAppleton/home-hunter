@@ -35,35 +35,54 @@ router.get('/', (req, res) => {
       ORDER BY p.created_at DESC
     `);
 
-    const properties = stmt.all().map((property: any) => ({
-      id: property.id,
-      name: property.name,
-      price: property.price,
-      squareFeet: property.square_feet,
-      bedrooms: property.bedrooms,
-      bathrooms: property.bathrooms,
-      status: property.status,
-      trainStation: property.train_station,
-      features: property.features ? JSON.parse(property.features) : [],
-      link: property.link,
-      agency: property.agency,
-      gpsLat: property.gps_lat,
-      gpsLng: property.gps_lng,
-      mapReference: property.map_reference,
-      coverImage: property.cover_image_filename,
-      notes: property.notes,
-      dateAdded: property.date_added,
-      dateViewed: property.date_viewed,
-      createdAt: property.created_at,
-      updatedAt: property.updated_at,
-      // Station distance fields
-      nearestStationId: property.nearest_station_id,
-      nearestStationDistance: property.nearest_station_distance,
-      nearestStationWalkingTime: property.nearest_station_walking_time,
-      allStationsWithin1km: property.all_stations_within_1km
-        ? JSON.parse(property.all_stations_within_1km)
-        : [],
-    }));
+    const properties = stmt.all().map((property: any) => {
+      // Get all images for this property
+      const imagesStmt = db.prepare(`
+        SELECT id, filename, original_name, is_cover, created_at
+        FROM property_images
+        WHERE property_id = ?
+        ORDER BY is_cover DESC, created_at ASC
+      `);
+
+      const images = imagesStmt.all(property.id).map((img: any) => ({
+        id: img.id,
+        filename: img.filename,
+        originalName: img.original_name,
+        isCover: Boolean(img.is_cover),
+        createdAt: img.created_at,
+      }));
+
+      return {
+        id: property.id,
+        name: property.name,
+        price: property.price,
+        squareFeet: property.square_feet,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        status: property.status,
+        trainStation: property.train_station,
+        features: property.features ? JSON.parse(property.features) : [],
+        link: property.link,
+        agency: property.agency,
+        gpsLat: property.gps_lat,
+        gpsLng: property.gps_lng,
+        mapReference: property.map_reference,
+        coverImage: property.cover_image_filename,
+        notes: property.notes,
+        dateAdded: property.date_added,
+        dateViewed: property.date_viewed,
+        createdAt: property.created_at,
+        updatedAt: property.updated_at,
+        images,
+        // Station distance fields
+        nearestStationId: property.nearest_station_id,
+        nearestStationDistance: property.nearest_station_distance,
+        nearestStationWalkingTime: property.nearest_station_walking_time,
+        allStationsWithin1km: property.all_stations_within_1km
+          ? JSON.parse(property.all_stations_within_1km)
+          : [],
+      };
+    });
 
     res.json(properties);
   } catch (error) {
@@ -337,7 +356,7 @@ router.put('/:id', (req, res) => {
       id
     );
 
-    // Return updated property
+    // Return updated property with all images
     const updatedPropertyStmt = db.prepare(`
       SELECT 
         p.*,
@@ -348,6 +367,22 @@ router.put('/:id', (req, res) => {
     `);
 
     const updatedProperty = updatedPropertyStmt.get(id) as any;
+
+    // Get all images for this property
+    const imagesStmt = db.prepare(`
+      SELECT id, filename, original_name, is_cover, created_at
+      FROM property_images
+      WHERE property_id = ?
+      ORDER BY is_cover DESC, created_at ASC
+    `);
+
+    const images = imagesStmt.all(id).map((img: any) => ({
+      id: img.id,
+      filename: img.filename,
+      originalName: img.original_name,
+      isCover: Boolean(img.is_cover),
+      createdAt: img.created_at,
+    }));
 
     res.json({
       id: updatedProperty.id,
@@ -372,6 +407,14 @@ router.put('/:id', (req, res) => {
       dateViewed: updatedProperty.date_viewed,
       createdAt: updatedProperty.created_at,
       updatedAt: updatedProperty.updated_at,
+      images,
+      // Station distance fields
+      nearestStationId: updatedProperty.nearest_station_id,
+      nearestStationDistance: updatedProperty.nearest_station_distance,
+      nearestStationWalkingTime: updatedProperty.nearest_station_walking_time,
+      allStationsWithin1km: updatedProperty.all_stations_within_1km
+        ? JSON.parse(updatedProperty.all_stations_within_1km)
+        : [],
     });
   } catch (error) {
     console.error('Error updating property:', error);

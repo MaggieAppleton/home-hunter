@@ -68,6 +68,12 @@ router.post(
         return res.status(404).json({ error: 'Property not found' });
       }
 
+      // Remove cover status from all existing images for this property
+      const removeCoverStmt = db.prepare(`
+        UPDATE property_images SET is_cover = 0 WHERE property_id = ?
+      `);
+      removeCoverStmt.run(id);
+
       // Insert image records
       const insertStmt = db.prepare(`
       INSERT INTO property_images (property_id, filename, original_name, is_cover)
@@ -83,7 +89,7 @@ router.post(
           id,
           file.filename,
           file.originalname,
-          isCover
+          isCover ? 1 : 0
         );
 
         images.push({
@@ -170,7 +176,7 @@ router.delete('/images/:id', (req, res) => {
     }
 
     // If this was the cover image, set a new cover image
-    if (image.is_cover) {
+    if (image.is_cover === 1) {
       const newCoverStmt = db.prepare(`
         SELECT id FROM property_images
         WHERE property_id = ? AND id != ?

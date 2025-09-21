@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import type { Property, UpdatePropertyRequest } from '../types/property';
+import { api } from '../utils/api';
 
 interface PropertyDetailsModalProps {
   property: Property | null;
@@ -70,19 +71,29 @@ export function PropertyDetailsModal({
 
   if (!isOpen || !property) return null;
 
+  const formatPrice = (price?: number) => {
+    if (!price) return 'N/A';
+    return `£${(price / 100).toLocaleString()}`;
+  };
+
+  const formatDate = (date?: Date | string) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString();
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-xl mx-4">
-        <div className="px-5 py-4 border-b flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Property Details
+      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="px-6 py-4 border-b flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-gray-900">
+            {property.name}
           </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
           >
             <svg
-              className="w-5 h-5"
+              className="w-6 h-6"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -97,72 +108,226 @@ export function PropertyDetailsModal({
           </button>
         </div>
 
-        <div className="px-5 py-4 space-y-4">
-          <div>
-            <div className="text-sm text-gray-500">Name</div>
-            <div className="text-gray-900 font-medium break-words">
-              {property.name}
+        <div className="px-6 py-4 space-y-6">
+          {/* Images Section */}
+          {property.images && property.images.length > 0 && (
+            <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Images</h3>
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {property.images.map((image) => (
+                  <div key={image.id} className="relative group">
+                    <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <img
+                        src={api.images.getImageUrl(image.filename)}
+                        alt={image.originalName}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    {image.isCover && (
+                      <div className="absolute top-2 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
+                        Cover
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Property Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Basic Information */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                Basic Information
+              </h3>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Price
+                </label>
+                <div className="text-lg font-semibold text-gray-900">
+                  {formatPrice(property.price)}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bedrooms
+                  </label>
+                  <div className="text-gray-900">
+                    {property.bedrooms || 'N/A'}
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Bathrooms
+                  </label>
+                  <div className="text-gray-900">
+                    {property.bathrooms || 'N/A'}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Square Feet
+                </label>
+                <div className="text-gray-900">
+                  {property.squareFeet?.toLocaleString() || 'N/A'}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <div className="text-gray-900">{property.status}</div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Agency
+                </label>
+                <div className="text-gray-900">{property.agency || 'N/A'}</div>
+              </div>
+            </div>
+
+            {/* Location & Dates */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium text-gray-900">
+                Location & Dates
+              </h3>
+
+              <div className="grid grid-cols-1 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Latitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={lat}
+                    onChange={(e) => setLat(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="51.5074"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Longitude
+                  </label>
+                  <input
+                    type="number"
+                    step="any"
+                    value={lng}
+                    onChange={(e) => setLng(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="-0.1278"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date Added
+                </label>
+                <div className="text-gray-900">
+                  {formatDate(property.dateAdded)}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date Viewed
+                </label>
+                <div className="text-gray-900">
+                  {formatDate(property.dateViewed)}
+                </div>
+              </div>
+
+              {property.nearestStationId && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nearest Station
+                  </label>
+                  <div className="text-gray-900">
+                    {property.nearestStationId
+                      .replace(/-/g, ' ')
+                      .replace(/\b\w/g, (l) => l.toUpperCase())}
+                    {property.nearestStationDistance && (
+                      <span className="text-sm text-gray-500 ml-2">
+                        ({property.nearestStationDistance}m,{' '}
+                        {property.nearestStationWalkingTime || 0}min walk)
+                      </span>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Features */}
+          {property.features && property.features.length > 0 && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Latitude
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={lat}
-                onChange={(e) => setLat(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="51.5074"
-              />
+              <h3 className="text-lg font-medium text-gray-900 mb-3">
+                Features
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {property.features.map((feature, index) => (
+                  <span
+                    key={index}
+                    className="inline-flex px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full"
+                  >
+                    {feature}
+                  </span>
+                ))}
+              </div>
             </div>
+          )}
+
+          {/* Notes */}
+          {property.notes && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Longitude
-              </label>
-              <input
-                type="number"
-                step="any"
-                value={lng}
-                onChange={(e) => setLng(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                placeholder="-0.1278"
-              />
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Notes</h3>
+              <div className="text-gray-900 whitespace-pre-wrap">
+                {property.notes}
+              </div>
             </div>
-          </div>
+          )}
 
-          {error && <div className="text-sm text-red-600">{error}</div>}
-
+          {/* Links */}
           {property.link && (
             <div>
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Links</h3>
               <a
                 href={property.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-700 text-sm underline"
+                className="text-blue-600 hover:text-blue-700 underline"
               >
-                Open listing
+                View Property Listing
               </a>
             </div>
           )}
+
+          {error && <div className="text-sm text-red-600">{error}</div>}
         </div>
 
-        <div className="px-5 py-4 border-t flex justify-end space-x-3">
+        <div className="px-6 py-4 border-t flex justify-end space-x-3">
           <button
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
           >
-            Cancel
+            Close
           </button>
           <button
             onClick={handleSave}
             disabled={saving}
             className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? 'Saving...' : 'Save changes'}
+            {saving ? 'Saving...' : 'Save Coordinates'}
           </button>
         </div>
       </div>
