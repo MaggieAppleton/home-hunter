@@ -1,6 +1,6 @@
 South London Property Tracker — Implementation Plan
 
-Updated: September 21, 2025 3:59P
+Updated: September 21, 2025 4:05P
 
 Purpose
 
@@ -99,7 +99,7 @@ UX & responsiveness
 
 Frontend image enhancements
 
-- [ ] [P3-09] Single cover image in property popup in map
+- [x] [P3-09] Single cover image in property popup in map
 - [x] [P3-10] Property detail modal with full image gallery and property info
 - [ ] [P3-11] Add ALL property details to modal
 - [ ] [P3-12] Make all property details in modal editable. Change the action button from save coordinates to just "save" and it saves any changed data to the database.

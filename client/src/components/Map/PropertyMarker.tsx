@@ -46,7 +46,7 @@ function PropertyMarkerInner({ property }: PropertyMarkerProps) {
 
   return (
     <Marker position={[property.gpsLat, property.gpsLng]} icon={icon}>
-      <Popup maxWidth={300} minWidth={200}>
+      <Popup maxWidth={500} minWidth={400}>
         <MarkerPopup property={property} />
       </Popup>
     </Marker>
