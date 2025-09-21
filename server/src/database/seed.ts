@@ -20,9 +20,9 @@ export function seedDatabase() {
   const insertStmt = db.prepare(`
     INSERT INTO properties (
       name, price, square_feet, bedrooms, bathrooms, status, 
-      train_station, features, link, agency, gps_lat, gps_lng, 
+      train_station, link, agency, gps_lat, gps_lng, 
       map_reference, notes
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const exampleProperty = {
@@ -33,7 +33,6 @@ export function seedDatabase() {
     bathrooms: 1,
     status: 'Not contacted',
     train_station: 'Clapham Common',
-    features: JSON.stringify(['Garden', 'Balcony', 'Period features']),
     link: 'https://example.com/property/123',
     agency: 'Foxtons',
     gps_lat: 51.4618,
@@ -52,7 +51,6 @@ export function seedDatabase() {
       exampleProperty.bathrooms,
       exampleProperty.status,
       exampleProperty.train_station,
-      exampleProperty.features,
       exampleProperty.link,
       exampleProperty.agency,
       exampleProperty.gps_lat,

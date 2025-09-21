@@ -57,6 +57,8 @@ export interface StationWithDistance {
   lines: string[];
   type: string;
   zone?: number;
+  networks?: string[];
+  allTypes?: string[];
   distance: number;
   walkingTime: number;
 }
@@ -114,6 +116,8 @@ export function findStationsWithinRadius(
     lines: string[];
     type: string;
     zone?: number;
+    networks?: string[];
+    allTypes?: string[];
   }>,
   radiusMeters: number = 1000
 ): StationWithDistance[] {
@@ -138,4 +142,111 @@ export function findStationsWithinRadius(
 
   // Sort by distance
   return stationsWithinRadius.sort((a, b) => a.distance - b.distance);
+}
+
+/**
+ * Calculate nearby stations for a property (alias for findStationsWithinRadius)
+ */
+export function calculateNearbyStations(
+  propertyLat: number,
+  propertyLng: number,
+  stations: Array<{
+    id: string;
+    name: string;
+    lat: number;
+    lng: number;
+    lines: string[];
+    type: string;
+    zone?: number;
+    networks?: string[];
+    allTypes?: string[];
+  }>,
+  radiusMeters: number = 1000
+): StationWithDistance[] {
+  return findStationsWithinRadius(
+    propertyLat,
+    propertyLng,
+    stations,
+    radiusMeters
+  );
+}
+
+/**
+ * School with distance information
+ */
+export interface SchoolWithDistance {
+  id: string;
+  name: string;
+  lat: number;
+  lng: number;
+  ofstedRating: string;
+  schoolType: string;
+  performancePercentage: number;
+  distance: number;
+  walkingTime: number;
+}
+
+/**
+ * Find all schools within a given radius
+ */
+export function findSchoolsWithinRadius(
+  propertyLat: number,
+  propertyLng: number,
+  schools: Array<{
+    id: string;
+    name: string;
+    lat: number;
+    lng: number;
+    ofstedRating: string;
+    schoolType: string;
+    performancePercentage: number;
+  }>,
+  radiusMeters: number = 2000 // 2km for schools
+): SchoolWithDistance[] {
+  const schoolsWithinRadius: SchoolWithDistance[] = [];
+
+  for (const school of schools) {
+    const distance = calculateDistance(
+      propertyLat,
+      propertyLng,
+      school.lat,
+      school.lng
+    );
+
+    if (distance <= radiusMeters) {
+      schoolsWithinRadius.push({
+        ...school,
+        distance: Math.round(distance),
+        walkingTime: calculateWalkingTime(distance),
+      });
+    }
+  }
+
+  // Sort by distance
+  return schoolsWithinRadius.sort((a, b) => a.distance - b.distance);
+}
+
+/**
+ * Calculate nearby schools for a property
+ */
+export function calculateNearbySchools(
+  propertyLat: number,
+  propertyLng: number,
+  schools: Array<{
+    id: string;
+    name: string;
+    lat: number;
+    lng: number;
+    ofstedRating: string;
+    schoolType: string;
+    performancePercentage: number;
+  }>,
+  radiusMeters: number = 2000 // 2km for schools
+): SchoolWithDistance[] {
+  return findSchoolsWithinRadius(
+    propertyLat,
+    propertyLng,
+    schools,
+    radiusMeters
+  );
 }

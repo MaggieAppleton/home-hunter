@@ -226,7 +226,6 @@ export function PropertyForm({
       | 'Rejected'
       | 'Sold',
     trainStation: '',
-    features: '',
     link: '',
     agency: '',
     gpsLat: '',
@@ -250,7 +249,6 @@ export function PropertyForm({
         bathrooms: property.bathrooms?.toString() || '',
         status: property.status || 'Not contacted',
         trainStation: property.trainStation || '',
-        features: property.features.join(', ') || '',
         link: property.link || '',
         agency: property.agency || '',
         gpsLat: property.gpsLat?.toString() || '',
@@ -285,12 +283,6 @@ export function PropertyForm({
         : undefined,
       status: formData.status,
       trainStation: formData.trainStation || undefined,
-      features: formData.features
-        ? formData.features
-            .split(',')
-            .map((f) => f.trim())
-            .filter((f) => f)
-        : [],
       link: formData.link || undefined,
       agency: formData.agency || undefined,
       gpsLat: formData.gpsLat ? parseFloat(formData.gpsLat) : undefined,
@@ -559,27 +551,6 @@ export function PropertyForm({
                   onChange={(e) => handleInputChange('link', e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="https://example.com/property"
-                />
-              </div>
-
-              {/* Features */}
-              <div className="col-span-6">
-                <label
-                  htmlFor="features"
-                  className="block text-sm font-medium text-gray-700"
-                >
-                  Features (comma-separated)
-                </label>
-                <input
-                  type="text"
-                  name="features"
-                  id="features"
-                  value={formData.features}
-                  onChange={(e) =>
-                    handleInputChange('features', e.target.value)
-                  }
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="Garden, Balcony, Period features"
                 />
               </div>
 

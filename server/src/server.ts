@@ -1,7 +1,7 @@
 import express from 'express';
 import cors from 'cors';
-import { runMigrations } from './database/migrations/index';
-import { seedDatabase } from './database/seed';
+import { createDatabaseSchema } from './database/schema';
+import { seedDatabase } from './database/seed-new';
 import propertiesRouter from './routes/properties';
 import imagesRouter from './routes/images';
 import trainStationsRouter from './routes/train-stations';
@@ -27,9 +27,9 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Initialize database and run migrations
+// Initialize database with new schema
 try {
-  runMigrations(require('./database/migrations/runner').migrations);
+  createDatabaseSchema();
   seedDatabase();
   console.log('Database initialized successfully');
 } catch (error) {

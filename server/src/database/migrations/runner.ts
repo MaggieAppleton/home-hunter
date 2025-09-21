@@ -4,6 +4,7 @@ import { createPropertyImagesTable } from './002_create_property_images_table';
 import { createTrainStationsTable } from './003_create_train_stations_table';
 import { addStationDistancesToProperties } from './004_add_station_distances_to_properties';
 import { addMultiTypeFieldsToStations } from './006_add_multi_type_fields_to_stations';
+import { removeFeaturesColumn } from './007_remove_features_column';
 
 // Define all migrations in order
 const migrations = [
@@ -12,6 +13,7 @@ const migrations = [
   createTrainStationsTable,
   addStationDistancesToProperties,
   addMultiTypeFieldsToStations,
+  removeFeaturesColumn,
 ];
 
 // Run migrations if this file is executed directly

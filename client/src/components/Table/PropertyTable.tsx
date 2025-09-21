@@ -576,37 +576,6 @@ export function PropertyTable({
         },
         enableSorting: false,
       }),
-      columnHelper.accessor('features', {
-        header: 'Features',
-        size: 300,
-        cell: (info) => {
-          const features = info.getValue() as string[];
-          const featuresText = features.join(', ');
-
-          return (
-            <div className="w-full">
-              <EditableCell
-                value={featuresText}
-                onSave={async (value) => {
-                  const newFeatures = value
-                    ? (value as string)
-                        .split(',')
-                        .map((f) => f.trim())
-                        .filter((f) => f)
-                    : [];
-                  await handleFieldUpdate(
-                    info.row.original.id!,
-                    'features',
-                    newFeatures
-                  );
-                }}
-                type="text"
-              />
-            </div>
-          );
-        },
-        enableSorting: false,
-      }),
       columnHelper.accessor('notes', {
         header: 'Notes',
         size: 320,

@@ -1,5 +1,9 @@
 import express from 'express';
 import { getDatabase } from '../database/connection';
+import {
+  calculateNearbyStations,
+  calculateNearbySchools,
+} from '../utils/distance';
 
 const router = express.Router();
 
@@ -20,6 +24,104 @@ function validateLatLng(lat: unknown, lng: unknown): string | null {
   if (nlng < -180 || nlng > 180)
     return 'Longitude must be between -180 and 180';
   return null;
+}
+
+/**
+ * Calculate time on market in months
+ */
+function calculateTimeOnMarket(firstListedDate: string | null): number | null {
+  if (!firstListedDate) return null;
+
+  const firstListed = new Date(firstListedDate);
+  const now = new Date();
+  const diffTime = now.getTime() - firstListed.getTime();
+  const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30)); // Approximate months
+
+  return Math.max(0, diffMonths);
+}
+
+/**
+ * Update nearby stations and schools for a property
+ */
+async function updatePropertyNearbyData(
+  propertyId: number,
+  lat: number,
+  lng: number
+) {
+  const db = getDatabase();
+
+  try {
+    // Get all train stations
+    const stationsStmt = db.prepare(`
+      SELECT id, name, lat, lng, lines, type, zone, networks, all_types
+      FROM train_stations
+    `);
+    const stations = stationsStmt.all().map((station: any) => ({
+      ...station,
+      lines: JSON.parse(station.lines),
+      networks: station.networks ? JSON.parse(station.networks) : [],
+      allTypes: station.all_types ? JSON.parse(station.all_types) : [],
+    }));
+
+    // Calculate nearby stations (within 1km)
+    const nearbyStations = calculateNearbyStations(lat, lng, stations, 1000);
+
+    // Get all schools (when available)
+    const schoolsStmt = db.prepare(`
+      SELECT id, name, lat, lng, ofsted_rating, school_type, performance_percentage
+      FROM schools
+    `);
+    const schools = schoolsStmt.all() as Array<{
+      id: string;
+      name: string;
+      lat: number;
+      lng: number;
+      ofsted_rating: string;
+      school_type: string;
+      performance_percentage: number;
+    }>;
+
+    // Calculate nearby schools (within 2km)
+    const nearbySchools =
+      schools.length > 0
+        ? calculateNearbySchools(
+            lat,
+            lng,
+            schools.map((s) => ({
+              id: s.id,
+              name: s.name,
+              lat: s.lat,
+              lng: s.lng,
+              ofstedRating: s.ofsted_rating,
+              schoolType: s.school_type,
+              performancePercentage: s.performance_percentage,
+            })),
+            2000
+          )
+        : [];
+
+    // Update property with nearby data
+    const updateStmt = db.prepare(`
+      UPDATE properties 
+      SET nearby_stations = ?, nearby_schools = ?, updated_at = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `);
+
+    updateStmt.run(
+      JSON.stringify(nearbyStations),
+      JSON.stringify(nearbySchools),
+      propertyId
+    );
+
+    console.log(
+      `✓ Updated nearby data for property ${propertyId}: ${nearbyStations.length} stations, ${nearbySchools.length} schools`
+    );
+  } catch (error) {
+    console.error(
+      `✗ Failed to update nearby data for property ${propertyId}:`,
+      error
+    );
+  }
 }
 
 // GET /api/properties - List all properties
@@ -60,8 +162,6 @@ router.get('/', (req, res) => {
         bedrooms: property.bedrooms,
         bathrooms: property.bathrooms,
         status: property.status,
-        trainStation: property.train_station,
-        features: property.features ? JSON.parse(property.features) : [],
         link: property.link,
         agency: property.agency,
         gpsLat: property.gps_lat,
@@ -69,18 +169,19 @@ router.get('/', (req, res) => {
         mapReference: property.map_reference,
         coverImage: property.cover_image_filename,
         notes: property.notes,
+        firstListedDate: property.first_listed_date,
+        timeOnMarketMonths: property.time_on_market_months,
+        nearbyStations: property.nearby_stations
+          ? JSON.parse(property.nearby_stations)
+          : [],
+        nearbySchools: property.nearby_schools
+          ? JSON.parse(property.nearby_schools)
+          : [],
         dateAdded: property.date_added,
         dateViewed: property.date_viewed,
         createdAt: property.created_at,
         updatedAt: property.updated_at,
         images,
-        // Station distance fields
-        nearestStationId: property.nearest_station_id,
-        nearestStationDistance: property.nearest_station_distance,
-        nearestStationWalkingTime: property.nearest_station_walking_time,
-        allStationsWithin1km: property.all_stations_within_1km
-          ? JSON.parse(property.all_stations_within_1km)
-          : [],
       };
     });
 
@@ -137,8 +238,6 @@ router.get('/:id', (req, res) => {
       bedrooms: property.bedrooms,
       bathrooms: property.bathrooms,
       status: property.status,
-      trainStation: property.train_station,
-      features: property.features ? JSON.parse(property.features) : [],
       link: property.link,
       agency: property.agency,
       gpsLat: property.gps_lat,
@@ -146,18 +245,19 @@ router.get('/:id', (req, res) => {
       mapReference: property.map_reference,
       coverImage: property.cover_image_filename,
       notes: property.notes,
+      firstListedDate: property.first_listed_date,
+      timeOnMarketMonths: property.time_on_market_months,
+      nearbyStations: property.nearby_stations
+        ? JSON.parse(property.nearby_stations)
+        : [],
+      nearbySchools: property.nearby_schools
+        ? JSON.parse(property.nearby_schools)
+        : [],
       dateAdded: property.date_added,
       dateViewed: property.date_viewed,
       createdAt: property.created_at,
       updatedAt: property.updated_at,
       images,
-      // Station distance fields
-      nearestStationId: property.nearest_station_id,
-      nearestStationDistance: property.nearest_station_distance,
-      nearestStationWalkingTime: property.nearest_station_walking_time,
-      allStationsWithin1km: property.all_stations_within_1km
-        ? JSON.parse(property.all_stations_within_1km)
-        : [],
     };
 
     res.json(result);
@@ -168,7 +268,7 @@ router.get('/:id', (req, res) => {
 });
 
 // POST /api/properties - Create new property
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const db = getDatabase();
     const {
@@ -178,8 +278,6 @@ router.post('/', (req, res) => {
       bedrooms,
       bathrooms,
       status,
-      trainStation,
-      features,
       link,
       agency,
       gpsLat,
@@ -187,6 +285,7 @@ router.post('/', (req, res) => {
       mapReference,
       notes,
       dateViewed,
+      firstListedDate,
     } = req.body;
 
     // Validate required fields
@@ -202,11 +301,14 @@ router.post('/', (req, res) => {
       }
     }
 
+    // Calculate time on market
+    const timeOnMarketMonths = calculateTimeOnMarket(firstListedDate);
+
     const insertStmt = db.prepare(`
       INSERT INTO properties (
         name, price, square_feet, bedrooms, bathrooms, status,
-        train_station, features, link, agency, gps_lat, gps_lng,
-        map_reference, notes, date_viewed, updated_at
+        link, agency, gps_lat, gps_lng, map_reference, notes, 
+        date_viewed, first_listed_date, time_on_market_months, updated_at
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
     `);
 
@@ -217,23 +319,30 @@ router.post('/', (req, res) => {
       bedrooms || null,
       bathrooms || null,
       status || 'Not contacted',
-      trainStation || null,
-      features ? JSON.stringify(features) : null,
       link || null,
       agency || null,
       normalizeNumber(gpsLat) ?? null,
       normalizeNumber(gpsLng) ?? null,
       mapReference || null,
       notes || null,
-      dateViewed || null
+      dateViewed || null,
+      firstListedDate || null,
+      timeOnMarketMonths
     );
+
+    const propertyId = Number(result.lastInsertRowid);
+
+    // Calculate nearby stations and schools if coordinates are provided
+    if (gpsLat && gpsLng) {
+      await updatePropertyNearbyData(propertyId, Number(gpsLat), Number(gpsLng));
+    }
 
     // Return the created property
     const newPropertyStmt = db.prepare(`
       SELECT * FROM properties WHERE id = ?
     `);
 
-    const newProperty = newPropertyStmt.get(result.lastInsertRowid) as any;
+    const newProperty = newPropertyStmt.get(propertyId) as any;
 
     res.status(201).json({
       id: newProperty.id,
@@ -243,14 +352,20 @@ router.post('/', (req, res) => {
       bedrooms: newProperty.bedrooms,
       bathrooms: newProperty.bathrooms,
       status: newProperty.status,
-      trainStation: newProperty.train_station,
-      features: newProperty.features ? JSON.parse(newProperty.features) : [],
       link: newProperty.link,
       agency: newProperty.agency,
       gpsLat: newProperty.gps_lat,
       gpsLng: newProperty.gps_lng,
       mapReference: newProperty.map_reference,
       notes: newProperty.notes,
+      firstListedDate: newProperty.first_listed_date,
+      timeOnMarketMonths: newProperty.time_on_market_months,
+      nearbyStations: newProperty.nearby_stations
+        ? JSON.parse(newProperty.nearby_stations)
+        : [],
+      nearbySchools: newProperty.nearby_schools
+        ? JSON.parse(newProperty.nearby_schools)
+        : [],
       dateAdded: newProperty.date_added,
       dateViewed: newProperty.date_viewed,
       createdAt: newProperty.created_at,
@@ -264,7 +379,7 @@ router.post('/', (req, res) => {
 });
 
 // PUT /api/properties/:id - Update property
-router.put('/:id', (req, res) => {
+router.put('/:id', async (req, res) => {
   try {
     const db = getDatabase();
     const { id } = req.params;
@@ -275,8 +390,6 @@ router.put('/:id', (req, res) => {
       bedrooms,
       bathrooms,
       status,
-      trainStation,
-      features,
       link,
       agency,
       gpsLat,
@@ -284,6 +397,7 @@ router.put('/:id', (req, res) => {
       mapReference,
       notes,
       dateViewed,
+      firstListedDate,
     } = req.body;
 
     // Load existing property to support partial updates
@@ -301,13 +415,6 @@ router.put('/:id', (req, res) => {
     const effBedrooms = bedrooms ?? existing.bedrooms;
     const effBathrooms = bathrooms ?? existing.bathrooms;
     const effStatus = status ?? existing.status ?? 'Not contacted';
-    const effTrainStation = trainStation ?? existing.train_station;
-    const effFeatures =
-      features !== undefined
-        ? features
-          ? JSON.stringify(features)
-          : null
-        : existing.features; // keep existing JSON string
     const effLink = link ?? existing.link;
     const effAgency = agency ?? existing.agency;
     const effGpsLat = normalizeNumber(gpsLat) ?? existing.gps_lat;
@@ -315,6 +422,10 @@ router.put('/:id', (req, res) => {
     const effMapReference = mapReference ?? existing.map_reference;
     const effNotes = notes ?? existing.notes;
     const effDateViewed = dateViewed ?? existing.date_viewed;
+    const effFirstListedDate = firstListedDate ?? existing.first_listed_date;
+
+    // Calculate time on market
+    const timeOnMarketMonths = calculateTimeOnMarket(effFirstListedDate);
 
     // Validate required fields after merging
     if (!effName) {
@@ -332,8 +443,9 @@ router.put('/:id', (req, res) => {
     const updateStmt = db.prepare(`
       UPDATE properties SET
         name = ?, price = ?, square_feet = ?, bedrooms = ?, bathrooms = ?, status = ?,
-        train_station = ?, features = ?, link = ?, agency = ?, gps_lat = ?, gps_lng = ?,
-        map_reference = ?, notes = ?, date_viewed = ?, updated_at = CURRENT_TIMESTAMP
+        link = ?, agency = ?, gps_lat = ?, gps_lng = ?,
+        map_reference = ?, notes = ?, date_viewed = ?, first_listed_date = ?,
+        time_on_market_months = ?, updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
     `);
 
@@ -344,8 +456,6 @@ router.put('/:id', (req, res) => {
       effBedrooms || null,
       effBathrooms || null,
       effStatus,
-      effTrainStation || null,
-      effFeatures,
       effLink || null,
       effAgency || null,
       effGpsLat ?? null,
@@ -353,8 +463,15 @@ router.put('/:id', (req, res) => {
       effMapReference || null,
       effNotes || null,
       effDateViewed || null,
+      effFirstListedDate || null,
+      timeOnMarketMonths,
       id
     );
+
+    // Update nearby stations and schools if coordinates are provided
+    if (effGpsLat && effGpsLng) {
+      await updatePropertyNearbyData(Number(id), Number(effGpsLat), Number(effGpsLng));
+    }
 
     // Return updated property with all images
     const updatedPropertyStmt = db.prepare(`
@@ -392,10 +509,6 @@ router.put('/:id', (req, res) => {
       bedrooms: updatedProperty.bedrooms,
       bathrooms: updatedProperty.bathrooms,
       status: updatedProperty.status,
-      trainStation: updatedProperty.train_station,
-      features: updatedProperty.features
-        ? JSON.parse(updatedProperty.features)
-        : [],
       link: updatedProperty.link,
       agency: updatedProperty.agency,
       gpsLat: updatedProperty.gps_lat,
@@ -403,18 +516,19 @@ router.put('/:id', (req, res) => {
       mapReference: updatedProperty.map_reference,
       coverImage: updatedProperty.cover_image_filename,
       notes: updatedProperty.notes,
+      firstListedDate: updatedProperty.first_listed_date,
+      timeOnMarketMonths: updatedProperty.time_on_market_months,
+      nearbyStations: updatedProperty.nearby_stations
+        ? JSON.parse(updatedProperty.nearby_stations)
+        : [],
+      nearbySchools: updatedProperty.nearby_schools
+        ? JSON.parse(updatedProperty.nearby_schools)
+        : [],
       dateAdded: updatedProperty.date_added,
       dateViewed: updatedProperty.date_viewed,
       createdAt: updatedProperty.created_at,
       updatedAt: updatedProperty.updated_at,
       images,
-      // Station distance fields
-      nearestStationId: updatedProperty.nearest_station_id,
-      nearestStationDistance: updatedProperty.nearest_station_distance,
-      nearestStationWalkingTime: updatedProperty.nearest_station_walking_time,
-      allStationsWithin1km: updatedProperty.all_stations_within_1km
-        ? JSON.parse(updatedProperty.all_stations_within_1km)
-        : [],
     });
   } catch (error) {
     console.error('Error updating property:', error);

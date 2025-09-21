@@ -268,25 +268,6 @@ export function PropertyDetailsModal({
             </div>
           </div>
 
-          {/* Features */}
-          {property.features && property.features.length > 0 && (
-            <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-3">
-                Features
-              </h3>
-              <div className="flex flex-wrap gap-2">
-                {property.features.map((feature, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex px-3 py-1 text-sm bg-blue-100 text-blue-800 rounded-full"
-                  >
-                    {feature}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Notes */}
           {property.notes && (
             <div>
