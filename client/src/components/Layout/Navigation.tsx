@@ -1,13 +1,12 @@
 interface NavigationProps {
-  currentView: 'map' | 'table' | 'add';
-  onViewChange: (view: 'map' | 'table' | 'add') => void;
+  currentView: 'map' | 'table';
+  onViewChange: (view: 'map' | 'table') => void;
 }
 
 export function Navigation({ currentView, onViewChange }: NavigationProps) {
   const navItems = [
     { id: 'map' as const, label: 'Map View', icon: '🗺️' },
     { id: 'table' as const, label: 'Table View', icon: '📋' },
-    { id: 'add' as const, label: 'Add Property', icon: '➕' },
   ];
 
   return (

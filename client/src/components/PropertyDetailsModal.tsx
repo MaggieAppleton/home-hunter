@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Property, UpdatePropertyRequest } from '../types/property';
 import { api } from '../utils/api';
+import { calculateTimeOnMarket, formatTimeOnMarket } from '../utils/formatting';
 
 interface PropertyDetailsModalProps {
   property: Property | null;
@@ -92,6 +93,11 @@ export function PropertyDetailsModal({
       parsedLng,
     };
   }, [propertyDetails]);
+
+  // Calculate real-time time on market based on current firstListedDate
+  const realTimeOnMarket = useMemo(() => {
+    return calculateTimeOnMarket(propertyDetails.firstListedDate);
+  }, [propertyDetails.firstListedDate]);
 
   const validate = (): string | null => {
     const {
@@ -188,11 +194,6 @@ export function PropertyDetailsModal({
   };
 
   if (!isOpen || !property) return null;
-
-  const formatDate = (date?: Date | string) => {
-    if (!date) return 'N/A';
-    return new Date(date).toLocaleDateString();
-  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
@@ -469,11 +470,13 @@ export function PropertyDetailsModal({
                   Time on Market
                 </label>
                 <div className="text-gray-900">
-                  {property.timeOnMarketMonths !== undefined &&
-                  property.timeOnMarketMonths !== null
-                    ? `${Math.round(property.timeOnMarketMonths)} months`
-                    : 'N/A'}
+                  {formatTimeOnMarket(realTimeOnMarket)}
                 </div>
+                {propertyDetails.firstListedDate && (
+                  <p className="mt-1 text-xs text-gray-500">
+                    Calculated from first listed date
+                  </p>
+                )}
               </div>
             </div>
           </div>

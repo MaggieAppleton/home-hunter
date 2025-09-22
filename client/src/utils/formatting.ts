@@ -86,3 +86,28 @@ export function formatRelativeTime(date: Date | string): string {
   if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
   return `${Math.floor(diffInDays / 365)} years ago`;
 }
+
+/**
+ * Calculate time on market in months from first listed date
+ * Matches the server-side calculation logic
+ */
+export function calculateTimeOnMarket(firstListedDate: string | null | undefined): number | null {
+  if (!firstListedDate) return null;
+
+  const firstListed = new Date(firstListedDate);
+  const now = new Date();
+  const diffTime = now.getTime() - firstListed.getTime();
+  const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30)); // Approximate months
+
+  return Math.max(0, diffMonths);
+}
+
+/**
+ * Format time on market for display
+ */
+export function formatTimeOnMarket(timeOnMarketMonths: number | null | undefined): string {
+  if (timeOnMarketMonths === undefined || timeOnMarketMonths === null) {
+    return 'N/A';
+  }
+  return `${Math.round(timeOnMarketMonths)} months`;
+}
