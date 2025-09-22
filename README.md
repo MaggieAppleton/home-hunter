@@ -11,6 +11,18 @@ A local web application for tracking properties during house hunting in South Lo
 - **Data Export**: Export your property data as CSV or JSON
 - **Local Storage**: All data stored locally in SQLite database
 
+## Screenshots
+
+### Table View
+
+![Table View](images/ui1.png)
+_The table view shows all properties in a sortable, filterable table format with search functionality and status indicators._
+
+### Map View
+
+![Map View](images/ui2.png)
+_The map view displays properties as interactive markers on a map of South London, with detailed property cards and train station overlays._
+
 ## Tech Stack
 
 - **Frontend**: React with TypeScript, Tailwind CSS, Leaflet.js
