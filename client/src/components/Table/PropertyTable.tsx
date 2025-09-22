@@ -515,11 +515,10 @@ export function PropertyTable({
             <div className="text-sm">
               {nearestStation ? (
                 <div>
-                  <div className="font-medium">
-                    {nearestStation.name}
-                  </div>
+                  <div className="font-medium">{nearestStation.name}</div>
                   <div className="text-xs text-gray-500">
-                    {nearestStation.distance}m, {nearestStation.walkingTime}min walk
+                    {nearestStation.distance}m, {nearestStation.walkingTime}min
+                    walk
                   </div>
                 </div>
               ) : (
@@ -552,9 +551,7 @@ export function PropertyTable({
           return (
             <div className="text-sm">
               {value !== undefined && value !== null ? (
-                <span className="font-medium">
-                  {value.toFixed(1)} months
-                </span>
+                <span className="font-medium">{value.toFixed(1)} months</span>
               ) : (
                 <span className="text-gray-400 italic">N/A</span>
               )}

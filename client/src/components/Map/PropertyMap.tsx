@@ -49,7 +49,7 @@ export function PropertyMap({
   center = [51.5074, -0.1278], // Default to London center
   zoom = 11,
 }: PropertyMapProps) {
-  const [showStations, setShowStations] = useState(false);
+  const [showStations, setShowStations] = useState(true);
   const { stations, loading: stationsLoading } = useTrainStations();
 
   const isValidCoord = (lat?: number, lng?: number) => {
