@@ -47,5 +47,5 @@ logs
 *.db-shm
 *.db-wal
 
-# Keep the main database file for development
-data/properties.db
+# Exclude the entire data directory
+data/
