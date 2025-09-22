@@ -1,4 +1,6 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import { getDatabase } from '../database/connection';
 import {
   calculateNearbyStations,
@@ -645,9 +647,36 @@ router.delete('/:id', (req, res) => {
       return res.status(404).json({ error: 'Property not found' });
     }
 
+    // Get all image filenames before deletion
+    const imagesStmt = db.prepare(`
+      SELECT filename FROM property_images WHERE property_id = ?
+    `);
+    const images = imagesStmt.all(id) as { filename: string }[];
+
     // Delete property (images will be deleted by CASCADE)
     const deleteStmt = db.prepare('DELETE FROM properties WHERE id = ?');
     deleteStmt.run(id);
+
+    // Delete image files from filesystem
+    for (const image of images) {
+      const imagePath = path.join(
+        __dirname,
+        '../../../data/images',
+        image.filename
+      );
+
+      if (fs.existsSync(imagePath)) {
+        try {
+          fs.unlinkSync(imagePath);
+          console.log(`Deleted image file: ${image.filename}`);
+        } catch (fileError) {
+          console.error(
+            `Failed to delete image file ${image.filename}:`,
+            fileError
+          );
+        }
+      }
+    }
 
     res.status(204).send();
   } catch (error) {
