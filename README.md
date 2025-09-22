@@ -96,7 +96,7 @@ hunter/
 ├── server/                # Express backend
 │   ├── src/
 │   │   ├── routes/        # API routes
-│   │   ├── database/      # Database connection and migrations
+│   │   ├── database/      # Database connection and schema
 │   │   └── server.ts      # Main server file
 │   └── package.json
 ├── data/                  # Local data storage

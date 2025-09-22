@@ -40,9 +40,9 @@ Phase 1 — Core functionality
 Database and backend
 
 - [x] [P1-01] Implement SQLite connection (`server/src/database/connection.ts`)
-- [x] [P1-02] Add migrations framework and script (`server/src/database/migrations/`)
-- [x] [P1-03] Create `properties` table migration (per spec)
-- [x] [P1-04] Create `property_images` table migration (per spec)
+- [x] [P1-02] Create database schema with all tables (`server/src/database/schema.ts`)
+- [x] [P1-03] Create `properties` table (per spec)
+- [x] [P1-04] Create `property_images` table (per spec)
 - [x] [P1-05] Seed script to insert one example property
 - [x] [P1-06] CRUD routes: `GET /api/properties` (list)
 - [x] [P1-07] CRUD routes: `GET /api/properties/:id` (single)
