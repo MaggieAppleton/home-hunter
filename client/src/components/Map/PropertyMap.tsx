@@ -1,16 +1,18 @@
 import { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, useMap } from 'react-leaflet';
 import { LatLngBounds } from 'leaflet';
-import type { Property } from '../../types/property';
+import type { Property, UpdatePropertyRequest } from '../../types/property';
 import { PropertyMarker } from './PropertyMarker';
 import { useTrainStations } from '../../hooks/useTrainStations';
 import { TrainStationMarker } from './TrainStationMarker';
+import { PropertyDetailsModal } from '../PropertyDetailsModal';
 import 'leaflet/dist/leaflet.css';
 
 interface PropertyMapProps {
   properties: Property[];
   center?: [number, number];
   zoom?: number;
+  onPropertyUpdate?: (update: UpdatePropertyRequest) => Promise<void>;
 }
 
 // Component to fit map bounds to show all properties
@@ -48,8 +50,13 @@ export function PropertyMap({
   properties,
   center = [51.5074, -0.1278], // Default to London center
   zoom = 11,
+  onPropertyUpdate,
 }: PropertyMapProps) {
   const [showStations, setShowStations] = useState(true);
+  const [selectedProperty, setSelectedProperty] = useState<Property | null>(
+    null
+  );
+  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const { stations, loading: stationsLoading } = useTrainStations();
 
   const isValidCoord = (lat?: number, lng?: number) => {
@@ -62,6 +69,22 @@ export function PropertyMap({
   const propertiesWithLocation = properties.filter((p) =>
     isValidCoord(p.gpsLat, p.gpsLng)
   );
+
+  const handleOpenDetailsModal = (property: Property) => {
+    setSelectedProperty(property);
+    setIsDetailsModalOpen(true);
+  };
+
+  const handleCloseDetailsModal = () => {
+    setIsDetailsModalOpen(false);
+    setSelectedProperty(null);
+  };
+
+  const handleSaveProperty = async (update: UpdatePropertyRequest) => {
+    if (onPropertyUpdate) {
+      await onPropertyUpdate(update);
+    }
+  };
 
   return (
     <div className="relative">
@@ -100,7 +123,11 @@ export function PropertyMap({
 
           {/* Render property markers */}
           {propertiesWithLocation.map((property) => (
-            <PropertyMarker key={property.id} property={property} />
+            <PropertyMarker
+              key={property.id}
+              property={property}
+              onOpenDetailsModal={handleOpenDetailsModal}
+            />
           ))}
 
           {/* Render train station markers */}
@@ -111,6 +138,14 @@ export function PropertyMap({
             ))}
         </MapContainer>
       </div>
+
+      {/* Property Details Modal */}
+      <PropertyDetailsModal
+        property={selectedProperty}
+        isOpen={isDetailsModalOpen}
+        onClose={handleCloseDetailsModal}
+        onSave={handleSaveProperty}
+      />
     </div>
   );
 }

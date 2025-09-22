@@ -1,8 +1,13 @@
 import type { Property } from '../../types/property';
 import { api } from '../../utils/api';
+import {
+  formatTimeOnMarket,
+  calculateTimeOnMarket,
+} from '../../utils/formatting';
 
 interface MarkerPopupProps {
   property: Property;
+  onOpenDetailsModal?: (property: Property) => void;
 }
 
 function formatPrice(price?: number): string {
@@ -24,18 +29,34 @@ const statusColors = {
   Sold: 'bg-red-100 text-red-800',
 };
 
-export function MarkerPopup({ property }: MarkerPopupProps) {
+export function MarkerPopup({
+  property,
+  onOpenDetailsModal,
+}: MarkerPopupProps) {
   // Find the cover image from the property's images array
   const coverImage = property.images?.find((img) => img.isCover);
   const hasCoverImage = coverImage && coverImage.filename;
 
+  // Calculate time on market
+  const timeOnMarket = calculateTimeOnMarket(property.firstListedDate);
+
   return (
-    <div className="p-3 min-w-[350px] max-w-[450px]">
-      <div className="flex gap-3">
+    <div className="p-4 min-w-[380px] max-w-[480px]">
+      {/* Header with name and price */}
+      <div className="mb-3">
+        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">
+          {property.name}
+        </h3>
+        <div className="text-xl font-bold text-blue-600">
+          {formatPrice(property.price)}
+        </div>
+      </div>
+
+      <div className="flex gap-4">
         {/* Left side - Cover Image */}
         <div className="w-2/5 flex-shrink-0">
           {hasCoverImage ? (
-            <div className="w-full h-44 bg-gray-100 rounded-lg overflow-hidden">
+            <div className="w-full h-40 bg-gray-100 rounded-lg overflow-hidden">
               <img
                 src={api.images.getImageUrl(coverImage.filename)}
                 alt={`${property.name} cover image`}
@@ -44,116 +65,105 @@ export function MarkerPopup({ property }: MarkerPopupProps) {
               />
             </div>
           ) : (
-            <div className="w-full h-44 bg-gray-100 rounded-lg flex items-center justify-center">
+            <div className="w-full h-40 bg-gray-100 rounded-lg flex items-center justify-center">
               <span className="text-gray-400 text-sm">No image</span>
             </div>
           )}
         </div>
 
         {/* Right side - Property Information */}
-        <div className="w-3/5 space-y-2 min-w-0">
-          {/* Property Name */}
-          <h3 className="font-semibold text-gray-900 text-sm leading-tight">
-            {property.name}
-          </h3>
-
-          {/* Price */}
-          <div className="text-lg font-bold text-blue-600">
-            {formatPrice(property.price)}
-          </div>
-
+        <div className="w-3/5 space-y-3 min-w-0">
           {/* Property Details */}
-          <div className="space-y-1 text-sm text-gray-600">
+          <div className="space-y-1">
             {property.bedrooms && (
-              <div className="flex items-center">
-                <span className="font-medium">Bedrooms:</span>
-                <span className="ml-2">{property.bedrooms}</span>
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">
+                  {property.bedrooms} bedroom
+                  {property.bedrooms !== 1 ? 's' : ''}
+                </span>
               </div>
             )}
 
             {property.bathrooms && (
-              <div className="flex items-center">
-                <span className="font-medium">Bathrooms:</span>
-                <span className="ml-2">{property.bathrooms}</span>
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">
+                  {property.bathrooms} bathroom
+                  {property.bathrooms !== 1 ? 's' : ''}
+                </span>
               </div>
             )}
 
             {property.squareFeet && (
-              <div className="flex items-center">
-                <span className="font-medium">Size:</span>
-                <span className="ml-2">{property.squareFeet} sq ft</span>
+              <div className="text-sm text-gray-700">
+                <span className="font-medium">
+                  {property.squareFeet.toLocaleString()} sq ft
+                </span>
               </div>
             )}
           </div>
 
           {/* Status */}
-          <div className="flex items-center flex-wrap">
-            <span className="font-medium text-sm">Status:</span>
+          <div>
             <span
-              className={`ml-2 inline-flex px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${statusColors[property.status]}`}
+              className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${statusColors[property.status]}`}
             >
               {property.status}
             </span>
           </div>
 
-          {/* Train Station */}
-          {(property.trainStation || property.nearestStationId) && (
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Nearest Station:</span>
-              <span className="ml-2">
-                {property.trainStation || property.nearestStationId}
-                {property.nearestStationDistance && (
-                  <span className="text-xs text-gray-500 ml-1">
-                    ({property.nearestStationDistance}m,{' '}
-                    {property.nearestStationWalkingTime || 0}min walk)
-                  </span>
-                )}
-              </span>
-            </div>
-          )}
-
-          {/* All Nearby Stations */}
-          {property.allStationsWithin1km &&
-            property.allStationsWithin1km.length > 1 && (
-              <div className="text-xs text-gray-500">
-                <span className="font-medium">Nearby stations:</span>
-                <div className="mt-1 space-y-0.5">
-                  {property.allStationsWithin1km.slice(0, 3).map((station) => (
-                    <div key={station.id} className="flex justify-between">
-                      <span>{station.name}</span>
-                      <span>{station.distance}m</span>
-                    </div>
-                  ))}
-                  {property.allStationsWithin1km.length > 3 && (
-                    <div className="text-gray-400">
-                      +{property.allStationsWithin1km.length - 3} more
-                    </div>
-                  )}
-                </div>
+          {/* Nearby Stations */}
+          {property.nearbyStations && property.nearbyStations.length > 0 && (
+            <div className="space-y-1">
+              <div className="text-xs font-medium text-gray-600 uppercase tracking-wide">
+                Nearby Stations
               </div>
-            )}
-
-          {/* Agency */}
-          {property.agency && (
-            <div className="text-sm text-gray-600">
-              <span className="font-medium">Agency:</span>
-              <span className="ml-2 break-words">{property.agency}</span>
+              <div className="space-y-1">
+                {property.nearbyStations.slice(0, 3).map((station) => (
+                  <div key={station.id} className="text-xs text-gray-600">
+                    <span className="font-medium">{station.name}</span>
+                    <span className="ml-2 text-gray-500">
+                      {station.distance}m • {station.walkingTime}min walk
+                    </span>
+                  </div>
+                ))}
+                {property.nearbyStations.length > 3 && (
+                  <div className="text-xs text-gray-400">
+                    +{property.nearbyStations.length - 3} more stations
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
-          {/* Link */}
-          {property.link && (
-            <div className="pt-2">
+          {/* Time on Market */}
+          {timeOnMarket !== null && (
+            <div className="text-xs text-gray-600">
+              <span className="font-medium">Time on market:</span>
+              <span className="ml-1">{formatTimeOnMarket(timeOnMarket)}</span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="pt-2 space-y-2">
+            {property.link && (
               <a
                 href={property.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center px-3 py-1 border border-transparent text-xs font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center justify-center w-full px-3 py-1.5 border border-blue-600 text-xs font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
-                View Property
+                View on Zoopla
               </a>
-            </div>
-          )}
+            )}
+            {onOpenDetailsModal && (
+              <button
+                onClick={() => onOpenDetailsModal(property)}
+                className="inline-flex items-center justify-center w-full px-3 py-1.5 border border-gray-300 text-xs font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              >
+                View Details
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>

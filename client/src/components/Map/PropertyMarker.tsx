@@ -32,9 +32,13 @@ const statusColors = {
 
 interface PropertyMarkerProps {
   property: Property;
+  onOpenDetailsModal?: (property: Property) => void;
 }
 
-function PropertyMarkerInner({ property }: PropertyMarkerProps) {
+function PropertyMarkerInner({
+  property,
+  onOpenDetailsModal,
+}: PropertyMarkerProps) {
   if (!property.gpsLat || !property.gpsLng) {
     return null;
   }
@@ -47,7 +51,10 @@ function PropertyMarkerInner({ property }: PropertyMarkerProps) {
   return (
     <Marker position={[property.gpsLat, property.gpsLng]} icon={icon}>
       <Popup maxWidth={500} minWidth={400}>
-        <MarkerPopup property={property} />
+        <MarkerPopup
+          property={property}
+          onOpenDetailsModal={onOpenDetailsModal}
+        />
       </Popup>
     </Marker>
   );
