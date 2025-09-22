@@ -134,7 +134,8 @@ function App() {
             <div className="bg-white shadow rounded-lg">
               <div className="flex justify-between items-center p-4 border-b border-gray-200">
                 <h2 className="text-lg font-medium text-gray-900">
-                  Properties ({filteredProperties.length} of {properties.length})
+                  Properties ({filteredProperties.length} of {properties.length}
+                  )
                 </h2>
                 <div className="flex space-x-3">
                   <button
@@ -198,7 +199,6 @@ function App() {
             />
           </>
         );
-
 
       default:
         return null;

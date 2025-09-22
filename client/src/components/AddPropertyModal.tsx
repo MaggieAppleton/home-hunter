@@ -300,9 +300,8 @@ export function AddPropertyModal({
     };
 
     // Pass the selected files to upload after creation
-    const submitDataWithFiles = selectedFiles.length > 0 
-      ? { ...submitData, selectedFiles }
-      : submitData;
+    const submitDataWithFiles =
+      selectedFiles.length > 0 ? { ...submitData, selectedFiles } : submitData;
 
     try {
       await onCreate(submitDataWithFiles);
