@@ -60,32 +60,6 @@ export function formatDateTime(date: Date | string): string {
   }).format(dateObj);
 }
 
-/**
- * Parse a price string back to pence for API calls
- */
-export function parsePrice(priceString: string): number | undefined {
-  // Remove currency symbols and whitespace
-  const cleanString = priceString.replace(/[£,\s]/g, '');
-  const num = parseFloat(cleanString);
-  return isNaN(num) ? undefined : Math.round(num * 100); // Convert to pence
-}
-
-/**
- * Get relative time string (e.g., "2 days ago")
- */
-export function formatRelativeTime(date: Date | string): string {
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
-  const now = new Date();
-  const diffInMs = now.getTime() - dateObj.getTime();
-  const diffInDays = Math.floor(diffInMs / (1000 * 60 * 60 * 24));
-
-  if (diffInDays === 0) return 'Today';
-  if (diffInDays === 1) return 'Yesterday';
-  if (diffInDays < 7) return `${diffInDays} days ago`;
-  if (diffInDays < 30) return `${Math.floor(diffInDays / 7)} weeks ago`;
-  if (diffInDays < 365) return `${Math.floor(diffInDays / 30)} months ago`;
-  return `${Math.floor(diffInDays / 365)} years ago`;
-}
 
 /**
  * Calculate time on market in months from first listed date
