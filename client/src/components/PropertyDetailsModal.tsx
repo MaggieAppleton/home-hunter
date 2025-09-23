@@ -207,6 +207,7 @@ export function PropertyDetailsModal({
             }
             className="text-xl font-semibold text-gray-900 bg-transparent border-none outline-none focus:ring-0 p-0"
             placeholder="Property name"
+            data-1p-ignore
           />
           <button
             onClick={onClose}
@@ -277,6 +278,7 @@ export function PropertyDetailsModal({
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Enter price in pence"
+                  data-1p-ignore
                 />
               </div>
 
@@ -297,6 +299,7 @@ export function PropertyDetailsModal({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Number of bedrooms"
+                    data-1p-ignore
                   />
                 </div>
                 <div>
@@ -316,6 +319,7 @@ export function PropertyDetailsModal({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Number of bathrooms"
+                    data-1p-ignore
                   />
                 </div>
               </div>
@@ -336,6 +340,7 @@ export function PropertyDetailsModal({
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Square feet"
+                  data-1p-ignore
                 />
               </div>
 
@@ -399,6 +404,7 @@ export function PropertyDetailsModal({
                   }
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Agency name"
+                  data-1p-ignore
                 />
               </div>
             </div>
@@ -426,6 +432,7 @@ export function PropertyDetailsModal({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="51.5074"
+                    data-1p-ignore
                   />
                 </div>
                 <div>
@@ -444,6 +451,7 @@ export function PropertyDetailsModal({
                     }
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                     placeholder="-0.1278"
+                    data-1p-ignore
                   />
                 </div>
               </div>
@@ -577,6 +585,7 @@ export function PropertyDetailsModal({
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               rows={4}
               placeholder="Add notes about this property..."
+              data-1p-ignore
             />
           </div>
 
@@ -594,6 +603,7 @@ export function PropertyDetailsModal({
               }
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="Property listing URL"
+              data-1p-ignore
             />
             {propertyDetails.link && (
               <div className="mt-2">

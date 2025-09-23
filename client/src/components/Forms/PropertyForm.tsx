@@ -369,6 +369,7 @@ export function PropertyForm({
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="e.g. 2 Bedroom Flat, Clapham Common"
+                  data-1p-ignore
                 />
               </div>
 
@@ -503,6 +504,7 @@ export function PropertyForm({
                   }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Clapham Common"
+                  data-1p-ignore
                 />
               </div>
 
@@ -522,6 +524,7 @@ export function PropertyForm({
                   onChange={(e) => handleInputChange('agency', e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Foxtons"
+                  data-1p-ignore
                 />
               </div>
 
@@ -580,6 +583,7 @@ export function PropertyForm({
                   onChange={(e) => handleInputChange('link', e.target.value)}
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="https://example.com/property"
+                  data-1p-ignore
                 />
               </div>
 
@@ -601,6 +605,7 @@ export function PropertyForm({
                   }
                   className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="TQ 295 770"
+                  data-1p-ignore
                 />
               </div>
 
